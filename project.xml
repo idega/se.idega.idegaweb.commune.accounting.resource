@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <extend>${base.project.dir}/base-project.xml</extend>
+  <pomVersion>3</pomVersion>
+  <name>idegaWeb Commune Accounting Resource</name>
+  <artifactId>se.idega.idegaweb.commune.accounting.resource</artifactId>
+  <currentVersion>1.0-SNAPSHOT</currentVersion>
+  <inceptionYear>2004</inceptionYear>
+  <shortDescription>Commune Accounting Resource</shortDescription>
+  <versions>
+  </versions>
+  <branches/>
+  <developers>
+    <developer>
+      <name>Tryggvi Larusson</name>
+      <id>tryggvil</id>
+      <email>tryggvi@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Pall Helgason</name>
+      <id>palli</id>
+      <email>palli@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Eirikur Sveinn Hrafnsson</name>
+      <id>eiki</id>
+      <email>eiki@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Thorhallur Helgason</name>
+      <id>laddi</id>
+      <email>laddi@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+  </developers>
+  <dependencies>
+    <dependency>
+      <groupId>myfaces</groupId>
+      <artifactId>jsf-api</artifactId>
+      <version>1.0</version>
+      <type>jar</type>
+      <url>http://java.sun.com/j2ee/javaserverfaces/</url>
+      <properties/>
+    </dependency>
+    <dependency>
+      <groupId>ejb</groupId>
+      <artifactId>ejb</artifactId>
+      <version>2.0</version>
+      <type>jar</type>
+      <url>http://java.sun.com/products/ejb/docs.html</url>
+      <properties />
+    </dependency>
+     <dependency>
+      <groupId>poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>1.8.0-dev-20020919</version>
+      <type>jar</type>
+      <url>http://jakarta.apache.org/poi/</url>
+      <properties/>
+    </dependency>
+    <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>com.idega.core</artifactId>
+     <!--<version>1.9.1</version>-->
+      <version>SNAPSHOT</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+	</dependency>
+   <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>com.idega.block.school</artifactId>
+     <!--<version>1.0</version>-->
+      <version>SNAPSHOT</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency> 
+   <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>se.idega.idegaweb.commune</artifactId>
+     <!--<version>1.0</version>-->
+      <version>SNAPSHOT</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency>
+   <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>se.idega.idegaweb.commune.care</artifactId>
+     <!--<version>1.0</version>-->
+      <version>SNAPSHOT</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency>
+  <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>se.idega.idegaweb.commune.school</artifactId>
+     <!--<version>1.0</version>-->
+      <version>SNAPSHOT</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency>
+  <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>se.idega.idegaweb.commune.accounting</artifactId>
+     <!--<version>1.0</version>-->
+      <version>SNAPSHOT</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency>
+  </dependencies>
+  <build>
+    <sourceDirectory>src/java</sourceDirectory>
+    <unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+    <unitTest>
+      <includes>
+        <include>**/*Test.java</include>
+      </includes>
+    </unitTest>
+  </build>
+  <properties/>
+</project>

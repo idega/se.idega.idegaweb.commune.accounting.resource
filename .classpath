@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<classpath>
+  <classpathentry excluding="" kind="src" path="src/java">
+  </classpathentry>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/myfaces/jars/jsf-api-1.0.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/ejb/jars/ejb-2.0.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/poi/jars/poi-1.8.0-dev-20020919.jar">
+  </classpathentry>
+  <classpathentry kind="src" path="/com.idega.core">
+  </classpathentry>
+  <classpathentry kind="src" path="/com.idega.block.school">
+  </classpathentry>
+  <classpathentry kind="src" path="/se.idega.idegaweb.commune">
+  </classpathentry>
+  <classpathentry kind="src" path="/se.idega.idegaweb.commune.care">
+  </classpathentry>
+  <classpathentry kind="src" path="/se.idega.idegaweb.commune.school">
+  </classpathentry>
+  <classpathentry kind="src" path="/se.idega.idegaweb.commune.accounting">
+  </classpathentry>
+  <classpathentry kind="output" path="target/classes">
+  </classpathentry>
+</classpath>

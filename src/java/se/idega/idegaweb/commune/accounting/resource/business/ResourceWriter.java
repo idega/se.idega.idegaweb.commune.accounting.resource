@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.2 2004/03/16 13:56:36 anders Exp $
+ * $Id: ResourceWriter.java,v 1.3 2004/03/16 14:40:51 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -59,10 +59,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/16 13:56:36 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/16 14:40:51 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ResourceWriter {
 
@@ -278,7 +278,11 @@ public class ResourceWriter {
 
 				row.createCell((short)cellColumn++).setCellValue(schoolClass.getName());
 
-				row.createCell((short)cellColumn++).setCellValue(nativeLanguage.getName());
+				if (nativeLanguage != null) {
+					row.createCell((short)cellColumn++).setCellValue(nativeLanguage.getName());
+				} else {
+					cellColumn++;
+				}
 
 				int userId = ((Integer) student.getPrimaryKey()).intValue(); 
 				int nrOfYears = rcmHome.countByRscIdsAndUserId(resourceIds, userId);

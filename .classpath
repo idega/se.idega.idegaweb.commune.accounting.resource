@@ -23,6 +23,8 @@
   </classpathentry>
   <classpathentry kind="src" path="/se.idega.idegaweb.commune.accounting">
   </classpathentry>
+  <classpathentry kind="src" path="/com.idega.block.process">
+  </classpathentry>
   <classpathentry kind="output" path="target/classes">
   </classpathentry>
 </classpath>

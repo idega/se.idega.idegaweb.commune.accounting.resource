@@ -8,6 +8,7 @@ public interface ResourceHome extends com.idega.data.IDOHome
  public java.util.Collection findAllResources()throws javax.ejb.FinderException;
  public java.util.Collection findAssignRightResourcesByGrpId(java.lang.Integer p0)throws javax.ejb.FinderException;
  public java.util.Collection findBySchCategory(java.lang.String p0)throws javax.ejb.FinderException;
+ public java.util.Collection findBySchoolType(int p0)throws javax.ejb.FinderException;
  public Resource findResourceByName(java.lang.String p0)throws javax.ejb.FinderException;
  public java.util.Collection findViewRightResourcesByGrpId(java.lang.Integer p0)throws javax.ejb.FinderException;
 

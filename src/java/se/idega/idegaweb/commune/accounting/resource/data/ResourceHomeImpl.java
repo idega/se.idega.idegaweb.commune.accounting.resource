@@ -34,6 +34,13 @@ public java.util.Collection findBySchCategory(java.lang.String p0)throws javax.e
 	return this.getEntityCollectionForPrimaryKeys(ids);
 }
 
+public java.util.Collection findBySchoolType(int p0)throws javax.ejb.FinderException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	java.util.Collection ids = ((ResourceBMPBean)entity).ejbFindBySchoolType(p0);
+	this.idoCheckInPooledEntity(entity);
+	return this.getEntityCollectionForPrimaryKeys(ids);
+}
+
 public Resource findResourceByName(java.lang.String p0)throws javax.ejb.FinderException{
 	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
 	Object pk = ((ResourceBMPBean)entity).ejbFindResourceByName(p0);

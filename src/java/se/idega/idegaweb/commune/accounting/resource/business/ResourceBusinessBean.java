@@ -118,20 +118,29 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
    * @param yearInts intArray of related SchoolYears
    */
   public void saveResource(String name, int[] typeInts, int[] yearInts) {
+    UserTransaction trans = getSessionContext().getUserTransaction();
     try {
 			ResourceHome rscHome = (ResourceHome) getIDOHome(Resource.class);
       Resource bmp = rscHome.create();
+      trans.begin();          // Start transaction
       bmp.setResourceName(name);
       bmp.store();
       bmp.addSchoolTypes(typeInts);
       bmp.addSchoolYears(yearInts);
-    } catch (CreateException ce) {
-        ce.printStackTrace();
-        System.out.println(ce.getMessage());
-    } catch (RemoteException re) {
-        re.printStackTrace();
-        System.out.println(re.getMessage());
-    }
+      trans.commit();       // Commit transaction
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+      try {
+				trans.rollback();     // Rollback transaction
+			} catch (IllegalStateException e1) {
+				e1.printStackTrace();
+			} catch (SecurityException e1) {
+				e1.printStackTrace();
+			} catch (SystemException e1) {
+				e1.printStackTrace();
+			}
+    } 
   }
   
   /**
@@ -259,6 +268,8 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
       trans.commit();      // Commit the transaction
     } 
     catch(Exception e){
+      e.printStackTrace();
+      System.out.println(e.getMessage());
       try {
 				trans.rollback();
 			} catch (IllegalStateException e1) {

@@ -34,6 +34,13 @@ public java.util.Collection findAllByRscIdAndMemberId(java.lang.Integer p0,java.
 	return this.getEntityCollectionForPrimaryKeys(ids);
 }
 
+public java.util.Collection findByRscIdsAndSeasonId(int[] p0,int p1)throws javax.ejb.FinderException,com.idega.data.IDOLookupException,com.idega.data.IDOCompositePrimaryKeyException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	java.util.Collection ids = ((ResourceClassMemberBMPBean)entity).ejbFindByRscIdsAndSeasonId(p0,p1);
+	this.idoCheckInPooledEntity(entity);
+	return this.getEntityCollectionForPrimaryKeys(ids);
+}
+
  public ResourceClassMember findByPrimaryKey(Object pk) throws javax.ejb.FinderException{
   return (ResourceClassMember) super.findByPrimaryKeyIDO(pk);
  }
@@ -42,6 +49,13 @@ public java.util.Collection findAllByRscIdAndMemberId(java.lang.Integer p0,java.
 public int countByRscIdAndMemberId(java.lang.Integer p0,java.lang.Integer p1)throws com.idega.data.IDOException{
 	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
 	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeCountByRscIdAndMemberId(p0,p1);
+	this.idoCheckInPooledEntity(entity);
+	return theReturn;
+}
+
+public int countByRscIdsAndUserId(int[] p0,int p1)throws com.idega.data.IDOException,com.idega.data.IDOLookupException,com.idega.data.IDOCompositePrimaryKeyException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeCountByRscIdsAndUserId(p0,p1);
 	this.idoCheckInPooledEntity(entity);
 	return theReturn;
 }

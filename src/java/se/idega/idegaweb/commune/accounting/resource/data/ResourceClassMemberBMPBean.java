@@ -11,9 +11,15 @@ import java.util.Collection;
 
 import javax.ejb.FinderException;
 
+import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolClass;
 import com.idega.block.school.data.SchoolClassMember;
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOCompositePrimaryKeyException;
+import com.idega.data.IDOEntityDefinition;
 import com.idega.data.IDOException;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
 
 /**
@@ -54,11 +60,38 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
   }
   
   public int ejbHomeCountByRscIdAndMemberId(Integer rscId, Integer mbrId) throws IDOException {
-    IDOQuery q = idoQuery();
-    q.append("select count(*) from " + getEntityName());
-    q.appendWhereEquals(RESOURCE, rscId);
-    q.appendAndEquals(MEMBER, mbrId);
-    return super.idoGetNumberOfRecords(q);    
+	IDOQuery q = idoQuery();
+	q.append("select count(*) from " + getEntityName());
+	q.appendWhereEquals(RESOURCE, rscId);
+	q.appendAndEquals(MEMBER, mbrId);
+	return super.idoGetNumberOfRecords(q);    
+  }
+  
+  public int ejbHomeCountByRscIdsAndUserId(int[] rscIds, int userId) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
+	IDOEntityDefinition cmDef = IDOLookup.getEntityDefinitionForClass(SchoolClassMember.class);
+	String cmTableName = cmDef.getSQLTableName();
+	String cmIdName = cmDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+	IDOEntityDefinition scDef = IDOLookup.getEntityDefinitionForClass(SchoolClass.class);
+	String scTableName = scDef.getSQLTableName();
+	String scIdName = scDef.getPrimaryKeyDefinition().getField().getSQLFieldName();	
+	Date today = new Date(System.currentTimeMillis());
+	IDOQuery q = idoQuery();
+	q.append("select count(distinct sc.sch_school_season_id) from " + getEntityName() + " rp, ")
+	.append(cmTableName + " cm, ")
+	.append(scTableName + " sc")
+	.appendWhereEquals("rp." + MEMBER, "cm." + cmIdName)
+	.appendAnd().append("cm.register_date").appendLessThanOrEqualsSign().appendWithinSingleQuotes(today) 
+	.appendAndEquals("cm." + scIdName, "sc." + scIdName)
+	.appendAnd().append("rp." + RESOURCE + " IN ").appendLeftParenthesis();
+	for (int i = 0; i < rscIds.length; i++) {
+		q.append(rscIds[i]);
+		if (i < rscIds.length - 1) {
+			q.append(",");
+		}
+	}
+	q.appendRightParenthesis();
+	q.appendAndEquals("cm.ic_user_id", userId);
+	return super.idoGetNumberOfRecords(q);    
   }
   
   /**
@@ -80,6 +113,43 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	.appendWhereEquals("rp." + MEMBER, memberId)
 	.appendAndEquals("rp." + RESOURCE, "r.cacc_resource_id")
 	.appendOrderBy("r." + ResourceBMPBean.NAME);
+	return super.idoFindPKsByQuery(q);    
+  }
+
+  public Collection ejbFindByRscIdsAndSeasonId(int[] rscIds, int seasonId) throws FinderException, IDOLookupException, IDOCompositePrimaryKeyException {
+	IDOEntityDefinition cmDef = IDOLookup.getEntityDefinitionForClass(SchoolClassMember.class);
+	String cmTableName = cmDef.getSQLTableName();
+	String cmIdName = cmDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+	IDOEntityDefinition scDef = IDOLookup.getEntityDefinitionForClass(SchoolClass.class);
+	String scTableName = scDef.getSQLTableName();
+	String scIdName = scDef.getPrimaryKeyDefinition().getField().getSQLFieldName();	
+	IDOEntityDefinition sDef = IDOLookup.getEntityDefinitionForClass(School.class);
+	String sTableName = sDef.getSQLTableName();
+	String sIdName = sDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+	Date today = new Date(System.currentTimeMillis());
+	IDOQuery q = idoQuery();
+	q.append("select rp.* from " + getEntityName() + " rp, ")
+	.append(cmTableName + " cm, ")
+	.append(scTableName + " sc, ")
+	.append(sTableName + " s")
+	.appendWhereEquals("rp." + MEMBER, "cm." + cmIdName)
+	.appendAnd().append("cm.register_date").appendLessThanOrEqualsSign().appendWithinSingleQuotes(today) 
+	.appendAnd().appendLeftParenthesis().append("cm.removed_date is null")
+	.appendOr().append("cm.removed_date").appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis() 
+	.appendAndEquals("cm." + scIdName, "sc." + scIdName)
+	.appendAnd().append("rp." + RESOURCE + " IN ").appendLeftParenthesis();
+	for (int i = 0; i < rscIds.length; i++) {
+		q.append(rscIds[i]);
+		if (i < rscIds.length - 1) {
+			q.append(",");
+		}
+	}
+	q.appendRightParenthesis();
+	q.appendAndEquals("sc.school_id", "s." + sIdName)
+	.appendAndEquals("sc.sch_school_season_id", seasonId)
+	.appendAnd().appendLeftParenthesis().append("rp." + ENDDATE + " is null")
+	.appendOr().append("rp." + ENDDATE).appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis()
+	.appendOrderBy("s.school_name");
 	return super.idoFindPKsByQuery(q);    
   }
   

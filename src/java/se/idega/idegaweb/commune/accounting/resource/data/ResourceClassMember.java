@@ -3,7 +3,6 @@ package se.idega.idegaweb.commune.accounting.resource.data;
 
 public interface ResourceClassMember extends com.idega.data.IDOEntity
 {
- public void deleteThisRSCM()throws javax.ejb.RemoveException;
  public java.sql.Date getEndDate();
  public int getMemberFK();
  public int getResourceFK();

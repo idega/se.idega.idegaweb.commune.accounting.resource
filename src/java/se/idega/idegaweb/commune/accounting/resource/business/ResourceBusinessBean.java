@@ -7,12 +7,12 @@
 package se.idega.idegaweb.commune.accounting.resource.business;
 
 import java.rmi.RemoteException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -21,21 +21,27 @@ import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 import se.idega.idegaweb.commune.accounting.resource.data.Resource;
+import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMember;
+import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMemberHome;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceHome;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermission;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermissionHome;
-import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMember;
-import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMemberHome;
 
+import com.idega.block.school.business.SchoolBusiness;
+import com.idega.block.school.data.SchoolClass;
+import com.idega.block.school.data.SchoolClassMember;
+import com.idega.block.school.data.SchoolClassMemberHome;
 import com.idega.block.school.data.SchoolType;
 import com.idega.block.school.data.SchoolTypeHome;
 import com.idega.block.school.data.SchoolYear;
 import com.idega.block.school.data.SchoolYearHome;
+import com.idega.business.IBOLookup;
 import com.idega.business.IBOServiceBean;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.presentation.IWContext;
 import com.idega.util.IWTimestamp;
 
 /**
@@ -120,7 +126,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
   /**
    * Returns a Collection of Resources that providers are allowed to assign to a child
    */
-  public Collection getProviderAssignRightResources(Integer grpId) {
+  public Collection getAssignRightResourcesForGroup(Integer grpId) {
     Collection rscColl = null;
     try {
       ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
@@ -134,7 +140,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
   /**
    * Returns a Collection of Resources that providers are allowed to view
    */
-  public Collection getProviderViewRightResources(Integer grpId) {
+  public Collection getViewRightResourcesForGroup(Integer grpId) {
     Collection rscColl = null;
     try {
       ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
@@ -143,6 +149,73 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
       e.printStackTrace();
     }
     return rscColl;
+  }
+  
+  public Collection getAssignableResourcesForPlacement(Integer grpID,  Integer clsMemberID) {
+    Collection possibleRscs = getAssignRightResourcesForGroup(grpID);
+    Collection  validRscs = new Vector();
+    SchoolClassMember mbr; 
+    SchoolClass schClass;
+    int clsYearID;
+    int clsTypeID;
+    
+    try {
+      mbr = getSchoolClassMember(clsMemberID);
+      schClass = mbr.getSchoolClass();
+      clsYearID = schClass.getSchoolYearId();
+      clsTypeID = schClass.getSchoolTypeId();
+      
+      // Loop resources and check if the year and type match the SchoolClassMember(placement)      
+      for (Iterator iter = possibleRscs.iterator(); iter.hasNext();) {
+        boolean hasYear = false;
+        boolean hasType = false;
+        Resource theRsc = (Resource) iter.next();
+        
+        // Check if the resource has the placements school year
+        Collection rscYears = theRsc.findRelatedSchoolYears();
+        for (Iterator iterator = rscYears.iterator(); iterator.hasNext();) {
+					SchoolYear theYear = (SchoolYear) iterator.next();
+					Integer PK = (Integer) theYear.getPrimaryKey();
+          if (clsYearID == PK.intValue()) {
+            hasYear = true;
+            break;
+          }
+				}
+        // Check if the resource has the placements school type
+        Collection rscTypes = theRsc.findRelatedSchoolTypes();
+        for (Iterator iterator = rscTypes.iterator(); iterator.hasNext();) {
+          SchoolType theType = (SchoolType) iterator.next();
+          Integer PK = (Integer) theType.getPrimaryKey();
+          if (clsTypeID == PK.intValue()) {
+            hasType = true;
+            break;
+          }					
+				}
+        
+        // if the Resource has the year and type. Add to validRscs          
+        if (hasYear  && hasType) {
+          validRscs.add(theRsc);
+        }
+      }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    return validRscs;
+  }
+  
+  public SchoolClassMember getSchoolClassMember(Integer memberID) {
+    SchoolClassMember mbr = null;
+    try {
+      SchoolClassMemberHome mHome = (SchoolClassMemberHome) IDOLookup.getHome(SchoolClassMember.class); 
+      mbr = mHome.findByPrimaryKey(memberID);      
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return mbr;    
+  }
+  
+  public SchoolBusiness getSchoolBusiness(IWContext iwc) throws RemoteException {
+    return (SchoolBusiness) IBOLookup.getServiceInstance(iwc, SchoolBusiness.class);
   }
   
   /**
@@ -171,6 +244,28 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 			e.printStackTrace();
 		}
     return rscPerm;
+  }
+  
+  public Collection getResourcePlacementByMemberId(Integer memberId) {
+    Collection mColl = null;
+    try {
+      ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+      mColl = mHome.findAllByClassMemberId(memberId);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return mColl;
+  }
+  
+  public int countResourcePlacementsByRscIDAndMemberID(Integer rID, Integer mID) {
+    int pSum = -1;
+    try {
+      ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+      pSum = mHome.countByRscIdAndMemberId(rID, mID);
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+    return pSum;
   }
   
   public void saveResource(boolean isSavingExisting, String rscName, int[] typeInts, int[] yearInts, 
@@ -260,35 +355,51 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
    */
-  public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr)  throws RemoteException {
+  public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
       ResourceClassMemberHome rscPermHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
       try {
         IWTimestamp today = IWTimestamp.RightNow();
         today.setAsDate();    
         Date startDate = null;
         Date endDate = null;
+        IWTimestamp start;
+        
+        // Check valid resource and placement
+        if (rscId == -1) {
+          throw new ResourceException("cacc.rsc_placement.no_resource_chosen","You must chose a resource");
+        } else if (memberId == -1){
+          throw new ClassMemberException("cacc.rsc_placement.no_member_placement_id", "No group placement found");
+        } else {
+          int existing = countResourcePlacementsByRscIDAndMemberID(new Integer(rscId), new Integer(memberId));
+          if (existing > 0) {
+            throw new ResourceException("cacc.rsc_placement.this_resource_already_placed", "This placement already have this resource");
+          }
+        }
+        // Check dates
         if (!startDateStr.equals("")) {
-          IWTimestamp start = new IWTimestamp(startDateStr);
+          start= new IWTimestamp(startDateStr);
           start.setAsDate();
           if (start.isEarlierThan(today)) {
-            String tmpStr = start.toString();
-            String m = tmpStr;
+            throw new DateException("cacc.rsc_placement.to_early_start_date", "Startdate can't be earlier than today");
           } else {
             startDate = start.getDate();
           }
+        } else {
+          throw new DateException("cacc.rsc_placement.must_enter_start_date", "You must chose a startdate");                
         }
         if (!endDateStr.equals("")) {
           IWTimestamp end = new IWTimestamp(endDateStr);
           end.setAsDate();
           if (end.isEarlierThan(today)) {
-            String tmpStr = end.toString();
-            String m = tmpStr;
+            throw new DateException("cacc.rsc_placement.to_early_end_date", "Enddate can't be earlier than today");
+          } else if (end.isEarlierThan(start)){
+            throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
           } else {
             endDate = end.getDate();
           }
         }
          
-               
+        // Store       
         ResourceClassMember rscMemberBmp = rscPermHome.create();
         rscMemberBmp.setResourceFK(rscId);
         rscMemberBmp.setMemberFK(memberId);
@@ -301,8 +412,39 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
       catch (javax.ejb.CreateException ce) {
         throw new java.rmi.RemoteException(ce.getMessage());
       }            
-  }  
-  
+  }   
+
+  /**
+   * Delete all ResourcPermissions related to Resource with id rscId
+   * @param rscId The requested ResourcePermissions related Resourceid.
+   */
+  public void finishResourceClassMember(Integer mbrId, String startDateStr, String endDateStr) throws FinderException, RemoteException, DateException, ClassMemberException {
+    ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+    ResourceClassMember  mbr = mHome.findByPrimaryKey(mbrId);
+    IWTimestamp today = IWTimestamp.RightNow();
+    today.setAsDate();
+    IWTimestamp start = new IWTimestamp(startDateStr);
+    Date endDate;
+    
+    if (mbrId == null)
+      throw new ClassMemberException("cacc.rsc_placement.no_member_placement_id", "No group placement found");
+
+    // Check dates
+    if (!endDateStr.equals("")) {
+      IWTimestamp end = new IWTimestamp(endDateStr);
+      end.setAsDate();
+      if (end.isEarlierThan(today)) {
+        throw new DateException("cacc.rsc_placement.to_early_end_date", "Enddate can't be earlier than today");
+      } else if (end.isEarlierThan(start)){
+        throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
+      } else {
+        endDate = end.getDate();
+        mbr.setEndDate(endDate);
+        mbr.store();
+      }
+    }
+  }
+
   
   /**
    * Delete all ResourcPermissions related to Resource with id rscId
@@ -317,6 +459,17 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 			element.remove();
 		}
   }
+
+  /**
+   * Delete one ResourceClassMember (Resource placement) from a student
+   * @param memberId The requested ResourcePermissions related Resourceid.
+   */
+  public void deleteResourceClassMember(Integer memberId) throws RemoteException, FinderException, RemoveException {
+    ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+    ResourceClassMember rscMember = (ResourceClassMember) mHome.findByPrimaryKeyIDO(memberId);
+    rscMember.remove();
+  }  
+  
   
   /**
    * Gets all SchoolType instances from db related to the Resource rsc

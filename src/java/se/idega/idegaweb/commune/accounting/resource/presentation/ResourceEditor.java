@@ -142,7 +142,7 @@ public class ResourceEditor extends AccountingBlock {
       L.setParameter(PARAM_RSC_EDIT, primKey);
       LT.add(L);
       // Get delete button      
-      Image delImg = getDeleteIcon("Test tooltip");
+      Image delImg = getDeleteIcon(localize("cacc.resource.remove","Delete resource"));
       SubmitButton delButt = new SubmitButton(delImg, PARAM_RSC_DELETE, primKey);
       String tmpRscName = elem.getResourceName();
       String confirmMsgStart = iwrb.getLocalizedString(KEY_MSG_CONFIRM_DELETE_START, "Vill du verkligen radera resursen -");

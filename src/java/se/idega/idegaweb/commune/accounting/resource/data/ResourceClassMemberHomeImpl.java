@@ -13,9 +13,16 @@ public class ResourceClassMemberHomeImpl extends com.idega.data.IDOFactory imple
  }
 
 
-public java.util.Collection findAllRSCMsByRscIdAndMemberId(java.lang.Integer p0,java.lang.Integer p1)throws javax.ejb.FinderException{
+public java.util.Collection findAllByClassMemberId(java.lang.Integer p0)throws javax.ejb.FinderException{
 	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
-	java.util.Collection ids = ((ResourceClassMemberBMPBean)entity).ejbFindAllRSCMsByRscIdAndMemberId(p0,p1);
+	java.util.Collection ids = ((ResourceClassMemberBMPBean)entity).ejbFindAllByClassMemberId(p0);
+	this.idoCheckInPooledEntity(entity);
+	return this.getEntityCollectionForPrimaryKeys(ids);
+}
+
+public java.util.Collection findAllByRscIdAndMemberId(java.lang.Integer p0,java.lang.Integer p1)throws javax.ejb.FinderException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	java.util.Collection ids = ((ResourceClassMemberBMPBean)entity).ejbFindAllByRscIdAndMemberId(p0,p1);
 	this.idoCheckInPooledEntity(entity);
 	return this.getEntityCollectionForPrimaryKeys(ids);
 }
@@ -24,6 +31,13 @@ public java.util.Collection findAllRSCMsByRscIdAndMemberId(java.lang.Integer p0,
   return (ResourceClassMember) super.findByPrimaryKeyIDO(pk);
  }
 
+
+public int countByRscIdAndMemberId(java.lang.Integer p0,java.lang.Integer p1)throws com.idega.data.IDOException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeCountByRscIdAndMemberId(p0,p1);
+	this.idoCheckInPooledEntity(entity);
+	return theReturn;
+}
 
 
 }

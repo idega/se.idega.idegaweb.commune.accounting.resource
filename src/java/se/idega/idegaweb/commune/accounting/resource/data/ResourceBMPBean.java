@@ -71,14 +71,14 @@ public class ResourceBMPBean extends GenericEntity implements Resource {
 
   public Collection ejbFindAssignRightResourcesByGrpId(Integer grpId) throws FinderException {
     IDOQuery q = idoQuery();
-    q.append("select r.* from cacc_resource r, cacc_resource_permission rp ");
+
     q.appendWhereEquals("r.cacc_resource_id", "rp.cacc_resource_id");
     q.appendAndEquals("rp.ic_group_id", grpId);
     q.appendAndEqualsQuoted("rp.permit_assign_resource", "Y");  
     
     return idoFindPKsByQuery(q);
   }
-  
+ 
   public String getResourceName() {
     return this.getStringColumnValue(NAME);
   }

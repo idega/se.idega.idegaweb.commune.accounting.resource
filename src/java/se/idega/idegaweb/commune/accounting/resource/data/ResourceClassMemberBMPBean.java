@@ -13,6 +13,7 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOException;
 import com.idega.data.IDOQuery;
 import com.idega.block.school.data.SchoolClassMember;
 
@@ -42,17 +43,27 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
     this.addAttribute(ENDDATE, "Enddate for resourceperiod", true, true, Date.class);    
   }
   
-  public Collection ejbFindAllRSCMsByRscIdAndMemberId(Integer rscId, Integer mbrId) throws FinderException {
+  public Collection ejbFindAllByRscIdAndMemberId(Integer rscId, Integer mbrId) throws FinderException {
     IDOQuery q = idoQueryGetSelect();
     q.appendWhereEquals(RESOURCE, rscId);
     q.appendAndEquals(MEMBER, mbrId);
     return super.idoFindPKsByQuery(q);    
   }
   
-  public void deleteThisRSCM() throws RemoveException {
-    this.remove();
+  public int ejbHomeCountByRscIdAndMemberId(Integer rscId, Integer mbrId) throws IDOException {
+    IDOQuery q = idoQuery();
+    q.append("select count(*) from " + getEntityName());
+    q.appendWhereEquals(RESOURCE, rscId);
+    q.appendAndEquals(MEMBER, mbrId);
+    return super.idoGetNumberOfRecords(q);    
   }
   
+  public Collection ejbFindAllByClassMemberId(Integer memberId) throws FinderException {
+    IDOQuery q = idoQueryGetSelect();
+    q.appendWhereEquals(MEMBER, memberId);
+    return super.idoFindPKsByQuery(q);    
+  }
+    
   public void setResourceFK(int rscId) {
     this.setColumn(RESOURCE, rscId);
   }

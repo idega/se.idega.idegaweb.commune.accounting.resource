@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.7 2004/03/18 12:26:39 anders Exp $
+ * $Id: ResourceWriter.java,v 1.8 2004/03/18 13:23:11 laddi Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -63,10 +63,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/18 12:26:39 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/18 13:23:11 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ResourceWriter {
 
@@ -326,7 +326,7 @@ public class ResourceWriter {
 			SchoolSeason currentSeason = sb.getCurrentSchoolSeason();
 			CurrentSchoolSeasonHome seasonHome = (CurrentSchoolSeasonHome) IDOLookup.getHome(CurrentSchoolSeason.class);
 			CurrentSchoolSeason season = seasonHome.findCurrentSeason();
-			int currentSchoolChoiceSeasonId = ((Integer) season.getCurrent()).intValue();
+			int currentSchoolChoiceSeasonId = season.getCurrent().intValue();
 			
 			CommuneHome communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);
 			Commune homeCommune = communeHome.findDefaultCommune();

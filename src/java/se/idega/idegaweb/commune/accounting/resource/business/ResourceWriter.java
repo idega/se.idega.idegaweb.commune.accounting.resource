@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.18 2004/10/18 17:50:02 thomas Exp $
+ * $Id: ResourceWriter.java,v 1.19 2005/01/17 10:20:26 laddi Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -25,12 +25,12 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import se.idega.idegaweb.commune.accounting.presentation.AccountingBlock;
 import se.idega.idegaweb.commune.business.CommuneUserBusiness;
-import se.idega.idegaweb.commune.care.data.CurrentSchoolSeason;
-import se.idega.idegaweb.commune.care.data.CurrentSchoolSeasonHome;
+import se.idega.idegaweb.commune.care.business.CareConstants;
 import se.idega.idegaweb.commune.care.resource.data.Resource;
 import se.idega.idegaweb.commune.care.resource.data.ResourceClassMember;
 import se.idega.idegaweb.commune.care.resource.data.ResourceClassMemberHome;
 import se.idega.idegaweb.commune.care.resource.data.ResourceHome;
+import se.idega.idegaweb.commune.presentation.CommuneBlock;
 import se.idega.idegaweb.commune.school.data.SchoolChoice;
 import se.idega.idegaweb.commune.school.data.SchoolChoiceHome;
 
@@ -57,6 +57,7 @@ import com.idega.core.location.data.PostalCode;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWApplicationContext;
+import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.io.MemoryFileBuffer;
 import com.idega.io.MemoryInputStream;
@@ -69,10 +70,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/10/18 17:50:02 $ by $Author: thomas $
+ * Last modified: $Date: 2005/01/17 10:20:26 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ResourceWriter {
 
@@ -350,12 +351,12 @@ public class ResourceWriter {
 		MemoryFileBuffer buffer = null;
 		try {
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
+			IWBundle iwb = iwc.getIWMainApplication().getBundle(CommuneBlock.IW_BUNDLE_IDENTIFIER);
 
 			SchoolBusiness sb = getSchoolBusiness(iwc);
 			SchoolSeason currentSeason = sb.getCurrentSchoolSeason();
-			CurrentSchoolSeasonHome seasonHome = (CurrentSchoolSeasonHome) IDOLookup.getHome(CurrentSchoolSeason.class);
-			CurrentSchoolSeason season = seasonHome.findCurrentSeason();
-			int currentSchoolChoiceSeasonId = season.getCurrent().intValue();
+			SchoolSeason season = sb.getSchoolSeason(new Integer(iwb.getProperty(CareConstants.PROPERTY_CURRENT_SEASON, currentSeason.getPrimaryKey().toString())));
+			int currentSchoolChoiceSeasonId = ((Integer) season.getPrimaryKey()).intValue();
 			
 			CommuneHome communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);
 			Commune homeCommune = communeHome.findDefaultCommune();

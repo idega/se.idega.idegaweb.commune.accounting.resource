@@ -674,7 +674,6 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
     } 
     catch(Exception e){
       e.printStackTrace();
-      System.out.println(e.getMessage());
       try {
 				trans.rollback();
 			} catch (IllegalStateException e1) {

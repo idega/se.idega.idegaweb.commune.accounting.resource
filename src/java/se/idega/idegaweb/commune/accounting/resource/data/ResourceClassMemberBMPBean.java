@@ -76,8 +76,6 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	.appendWhereEquals("rp." + MEMBER, memberId)
 	.appendAndEquals("rp." + RESOURCE, "r.cacc_resource_id")
 	.appendOrderBy("r." + ResourceBMPBean.NAME);
-
-	System.out.println("*** SQL "  + q.toString());	
 	return super.idoFindPKsByQuery(q);    
   }
   

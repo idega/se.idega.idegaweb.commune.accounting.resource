@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.4 2004/03/16 16:27:43 anders Exp $
+ * $Id: ResourceWriter.java,v 1.5 2004/03/17 07:51:40 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -59,10 +59,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/16 16:27:43 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/17 07:51:40 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ResourceWriter {
 
@@ -219,7 +219,6 @@ public class ResourceWriter {
 			Iterator iter = resourceMembers.iterator();
 			while (iter.hasNext()) {
 				cellColumn = 0;
-				row = sheet.createRow((short)cellRow++);
 				
 				ResourceClassMember resourceMember = (ResourceClassMember) iter.next();
 				SchoolClassMember placement = resourceMember.getSchoolClassMember();
@@ -244,6 +243,8 @@ public class ResourceWriter {
 				User custodian = getCommuneUserBusiness(iwc).getCustodianForChild(student);
 				ICLanguage nativeLanguage = student.getNativeLanguage();
 	
+				row = sheet.createRow((short)cellRow++);
+				
 				row.createCell((short)cellColumn++).setCellValue(PersonalIDFormatter.format(student.getPersonalID(), iwc.getCurrentLocale()));
 				row.createCell((short)cellColumn++).setCellValue(student.getNameLastFirst(true));
 	

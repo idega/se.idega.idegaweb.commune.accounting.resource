@@ -28,6 +28,8 @@ import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermission;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermissionHome;
 
 import com.idega.block.school.business.SchoolBusiness;
+import com.idega.block.school.data.SchoolCategory;
+import com.idega.block.school.data.SchoolCategoryHome;
 import com.idega.block.school.data.SchoolClass;
 import com.idega.block.school.data.SchoolClassMember;
 import com.idega.block.school.data.SchoolClassMemberHome;
@@ -49,7 +51,7 @@ import com.idega.util.IWTimestamp;
  *
  * This Businessbean contains methods for Resourcehandling(resource in the School sense of the word).
  */
-public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusiness {
+public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBusiness {
   
   /**
    * Returns a Collection with all instances of the Class SchoolType from the DB.
@@ -652,6 +654,40 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 				e1.printStackTrace();
 			}
     }    
+  }
+  
+  public Collection findAllSchoolCategories() {
+  	Collection cats = new Vector();
+  	try {
+		cats = getSchoolCategoryHome().findAllCategories();
+	} catch (FinderException e) {
+		e.printStackTrace();
+	}
+	return cats;
+  }
+  
+  public Collection findAllResourcesByCategory(String schCategoryID) {
+	ResourceHome rscHome = null;
+	Collection rscColl = new Vector();
+  	try {
+		rscHome = (ResourceHome) IDOLookup.getHome(Resource.class);
+		rscColl = rscHome.findBySchCategory(schCategoryID);
+	} catch (IDOLookupException e) {
+		e.printStackTrace();
+	} catch (FinderException fe) {
+
+	}
+	return rscColl;
+  }
+  
+  public SchoolCategoryHome getSchoolCategoryHome() {
+  	SchoolCategoryHome home = null;
+  	try {
+		home = (SchoolCategoryHome) IDOLookup.getHome(SchoolCategory .class);
+	} catch (IDOLookupException e) {
+		e.printStackTrace();
+	}
+  	return home;
   }
 
 }

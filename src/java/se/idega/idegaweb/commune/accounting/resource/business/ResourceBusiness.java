@@ -11,6 +11,8 @@ public interface ResourceBusiness extends com.idega.business.IBOService
  public void deletePermissionsForResource(java.lang.Integer p0)throws java.rmi.RemoteException,javax.ejb.FinderException,javax.ejb.RemoveException, java.rmi.RemoteException;
  public void deleteResourceClassMember(java.lang.Integer p0)throws java.rmi.RemoteException,javax.ejb.FinderException,javax.ejb.RemoveException, java.rmi.RemoteException;
  public java.util.Collection findAllResources() throws java.rmi.RemoteException;
+ public java.util.Collection findAllResourcesByCategory(java.lang.String p0) throws java.rmi.RemoteException;
+ public java.util.Collection findAllSchoolCategories() throws java.rmi.RemoteException;
  public java.util.Collection findAllSchoolTypes() throws java.rmi.RemoteException;
  public java.util.Collection findAllSchoolYears() throws java.rmi.RemoteException;
  public void finishResourceClassMember(java.lang.Integer p0,java.lang.String p1,java.lang.String p2)throws javax.ejb.FinderException,java.rmi.RemoteException,se.idega.idegaweb.commune.accounting.resource.business.DateException,se.idega.idegaweb.commune.accounting.resource.business.ClassMemberException, java.rmi.RemoteException;
@@ -25,6 +27,7 @@ public interface ResourceBusiness extends com.idega.business.IBOService
  public java.util.Collection getResourcePlacementsByMemberId(java.lang.Integer p0) throws java.rmi.RemoteException;
  public se.idega.idegaweb.commune.accounting.resource.data.ResourcePermission getRscPermByRscAndGrpId(java.lang.Integer p0,java.lang.Integer p1) throws java.rmi.RemoteException;
  public com.idega.block.school.business.SchoolBusiness getSchoolBusiness(com.idega.presentation.IWContext p0)throws java.rmi.RemoteException, java.rmi.RemoteException;
+ public com.idega.block.school.data.SchoolCategoryHome getSchoolCategoryHome() throws java.rmi.RemoteException;
  public com.idega.block.school.data.SchoolClassMember getSchoolClassMember(java.lang.Integer p0) throws java.rmi.RemoteException;
  public java.util.Collection getViewRightResourcesForGroup(java.lang.Integer p0) throws java.rmi.RemoteException;
  public void removeResource(java.lang.Integer p0) throws java.rmi.RemoteException;

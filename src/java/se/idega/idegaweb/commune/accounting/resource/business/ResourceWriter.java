@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.13 2004/03/30 09:33:32 anders Exp $
+ * $Id: ResourceWriter.java,v 1.14 2004/03/30 12:55:03 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -69,10 +69,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/30 09:33:32 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/30 12:55:03 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ResourceWriter {
 
@@ -659,7 +659,7 @@ public class ResourceWriter {
 				cell = row.createCell((short) 1);
 				cell.setCellValue("" + communeStudentCount);
 				
-				int outsideCommuneStudentCount = rcmHome.countByRscSchoolTypeSeasonManagementTypeAndCommune(resourceId, schoolTypeId, seasonId, managementTypeId, homeCommuneId, false);
+				int outsideCommuneStudentCount = rcmHome.countByRscSchoolTypeSeasonManagementTypeAndCommune(resourceId, schoolTypeId, seasonId, managementTypeId, homeCommuneId, true);
 				cell = row.createCell((short) 2);
 				cell.setCellValue("" + outsideCommuneStudentCount);				
 			}

@@ -1,5 +1,5 @@
 /*
- * $Id: NativeLanguageList.java,v 1.1 2004/03/16 13:54:29 anders Exp $
+ * $Id: NativeLanguageList.java,v 1.2 2004/03/18 12:27:21 anders Exp $
  *
  * Copyright (C) 2004 Agura IT. All Rights Reserved.
  *
@@ -23,23 +23,27 @@ import com.idega.presentation.ui.SubmitButton;
 /** 
  * This idegaWeb block generates Excel file listing placements with native languge resources.
  * <p>
- * Last modified: $Date: 2004/03/16 13:54:29 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/18 12:27:21 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NativeLanguageList extends AccountingBlock {
 
 	private final static int ACTION_DEFAULT = 0;
-	private final static int ACTION_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST = 1;
+	private final static int ACTION_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST = 1;
+	private final static int ACTION_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST = 2;
 	
 	private final static String PP = "rsc_ntl_"; // Parameter prefix 
 
+	private final static String PARAMETER_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST = PP + "cnscl";
 	private final static String PARAMETER_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST = PP + "cnll";
 	
 	private final static String KP = "resource."; // Key prefix
 
+	private final static String KEY_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST = KP + "create_native_language_school_choice_list";
 	private final static String KEY_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST = KP + "create_native_language_placement_list";
+	private final static String KEY_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST = KP + "native_language_school_choice_list";
 	private final static String KEY_NATIVE_LANGUAGE_PLACEMENT_LIST = KP + "native_language_placement_list";
 	private final static String KEY_BACK = KP + "back";
 
@@ -53,8 +57,11 @@ public class NativeLanguageList extends AccountingBlock {
 				case ACTION_DEFAULT:
 					handleDefaultAction();
 					break;
+				case ACTION_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST:
+					handleCreateNativeLanguagePlacementList(iwc, true);
+					break;
 				case ACTION_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST:
-					handleCreateNativeLanguagePlacementList(iwc);
+					handleCreateNativeLanguagePlacementList(iwc, false);
 					break;
 			}
 		}
@@ -70,7 +77,9 @@ public class NativeLanguageList extends AccountingBlock {
 	private int parseAction(IWContext iwc) {
 		int action = ACTION_DEFAULT;
 		
-		if (iwc.isParameterSet(PARAMETER_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST)) {
+		if (iwc.isParameterSet(PARAMETER_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST)) {
+			action = ACTION_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST;
+		} else if (iwc.isParameterSet(PARAMETER_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST)) {
 			action = ACTION_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST;
 		}
 		
@@ -85,22 +94,27 @@ public class NativeLanguageList extends AccountingBlock {
 		table.setCellpadding(getCellpadding());
 		table.setCellspacing(getCellspacing());
 		
+		SubmitButton createSchoolChoiceListButton = new SubmitButton(PARAMETER_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST, 
+				localize(KEY_CREATE_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST, "Create native language school choice list"));
+		createSchoolChoiceListButton = (SubmitButton) getButton(createSchoolChoiceListButton);
+		table.add(createSchoolChoiceListButton, 1, 1);
+		
 		SubmitButton createListButton = new SubmitButton(PARAMETER_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST, 
 				localize(KEY_CREATE_NATIVE_LANGUAGE_PLACEMENT_LIST, "Create native language placement list"));
 		createListButton = (SubmitButton) getButton(createListButton);
-		
-		table.add(createListButton, 1, 1);
+		table.add(createListButton, 2, 1);
+
 		add(table);		
 	}
 	
 	/*
 	 * Handles creation of native language placement list.
 	 */	
-	private void handleCreateNativeLanguagePlacementList(IWContext iwc) {
-//		IWTimestamp now = IWTimestamp.RightNow();
-//		String today = now.getDateString("yyMMdd");
-//		String fileName = "native_language_placements_" + today + ".xls";
+	private void handleCreateNativeLanguagePlacementList(IWContext iwc, boolean isSchoolChoice) {
 		String fileName = "native_language_placements.xls";
+		if (isSchoolChoice) {
+			fileName = "native_language_school_choice.xls";
+		}
 				
 		Table table = new Table();
 		table.setCellpadding(getCellpadding());
@@ -108,11 +122,14 @@ public class NativeLanguageList extends AccountingBlock {
 
 		try {
 			ResourceWriter xlsWriter = new ResourceWriter(fileName);
-			ICFile file = xlsWriter.createFile(iwc);
+			ICFile file = xlsWriter.createFile(iwc, isSchoolChoice);
 			Link iconLink = new Link(getBundle().getImage("shared/xls.gif"));
 			iconLink.setFile(file);
 			table.add(iconLink, 1, 1);
 			String title = localize(KEY_NATIVE_LANGUAGE_PLACEMENT_LIST, "Native language placement list");
+			if (isSchoolChoice) {
+				title = localize(KEY_NATIVE_LANGUAGE_SCHOOL_CHOICE_LIST, "Native language school choice list");
+			}
 			Link link = new Link(title);
 			link.setFile(file);
 			table.add(link, 2, 1);

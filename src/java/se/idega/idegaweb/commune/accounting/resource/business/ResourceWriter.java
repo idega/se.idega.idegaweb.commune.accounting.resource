@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.1 2004/03/16 13:53:57 anders Exp $
+ * $Id: ResourceWriter.java,v 1.2 2004/03/16 13:56:36 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -59,10 +59,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/16 13:53:57 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/16 13:56:36 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ResourceWriter {
 
@@ -286,9 +286,6 @@ public class ResourceWriter {
 			}
 			
 			wb.write(mos);
-			java.io.FileOutputStream out = new java.io.FileOutputStream("/Users/al/test.xls");
-			wb.write(out);
-			out.close();
 			buffer.setMimeType("application/vnd.ms-excel");
 		} catch (Exception e) {
 			e.printStackTrace();

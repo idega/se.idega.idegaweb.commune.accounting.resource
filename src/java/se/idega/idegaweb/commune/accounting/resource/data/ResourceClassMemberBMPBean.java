@@ -57,9 +57,15 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
     return super.idoGetNumberOfRecords(q);    
   }
   
-  public Collection ejbFindAllByClassMemberId(Integer memberId) throws FinderException {
+  /**
+   * Finds all ResourceClassMembers for a SchoolClassMember
+   * @param memberId
+   * @return
+   * @throws FinderException
+   */
+  public Collection ejbFindAllByClassMemberId(Integer schClassMemberId) throws FinderException {
     IDOQuery q = idoQueryGetSelect();
-    q.appendWhereEquals(MEMBER, memberId);
+    q.appendWhereEquals(MEMBER, schClassMemberId);
     return super.idoFindPKsByQuery(q);    
   }
 

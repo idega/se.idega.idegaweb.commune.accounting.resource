@@ -491,16 +491,28 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 		return rscMemberBmp;            
 	}   
 
-
+	
+	/**
+	 * Saves a ResourcePlacement to DB. Has indata checks and throws indata exceptions. Used primarily
+	 * by SchoolAdminOverview.
+	 * @param rscId The ResourceID. 
+	 * @param grpId The SchoolPlacements SchoolClassMemberID.
+	 * @param startDate Startdate of this ResourcePlacement
+	 * @param endDate Enddate of this ResourcePlacement
+	 */
+	public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+		createResourcePlacement(rscId, memberId, startDateStr, endDateStr, true);
+	}
   /**
-   * Saves a ResourcePlacement to DB. Has indata checks and throws indata exceptions. Used primarily
+   * Saves a ResourcePlacement to DB. Has boolean to set if we want to check past time of start date. 
+   * Has indata checks and throws indata exceptions. Used primarily
    * by SchoolAdminOverview.
    * @param rscId The ResourceID. 
    * @param grpId The SchoolPlacements SchoolClassMemberID.
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
    */
-  public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+  public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr, boolean doCheckStartDate)  throws RemoteException, DateException, ResourceException, ClassMemberException {
       ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
       try {
         IWTimestamp today = IWTimestamp.RightNow();
@@ -524,7 +536,11 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
         if (!startDateStr.equals("")) {
           start= new IWTimestamp(startDateStr);
           start.setAsDate();
-					startDate = start.getDate();
+          if (doCheckStartDate && start.isEarlierThan(today)) {
+          	throw new DateException("cacc.rsc_placement.to_early_start_date", "Startdate can't be earlier than today");
+          } else {
+          	startDate = start.getDate();
+          }
         } else {
           throw new DateException("cacc.rsc_placement.must_enter_start_date", "You must chose a startdate");                
         }

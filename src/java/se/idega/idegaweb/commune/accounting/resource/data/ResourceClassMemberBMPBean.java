@@ -96,7 +96,7 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	return super.idoGetNumberOfRecords(q);    
   }
   
-  public int ejbHomeCountBySchoolTypeSeasonAndCommune(int schoolTypeId, int seasonId, int communeId) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
+  public int ejbHomeCountByRscSchoolTypeSeasonAndCommune(int resourceId, int schoolTypeId, int seasonId, int communeId) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
 	IDOEntityDefinition cmDef = IDOLookup.getEntityDefinitionForClass(SchoolClassMember.class);
 	String cmTableName = cmDef.getSQLTableName();
 	String cmIdName = cmDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
@@ -124,6 +124,7 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	.append(aTableName + " a, ")
 	.append(uaTableName + " ua")
 	.appendWhereEquals("rp." + MEMBER, "cm." + cmIdName)
+	.appendAndEquals("rp." +  RESOURCE, resourceId)
 	.appendAnd().append("cm.register_date").appendLessThanOrEqualsSign().appendWithinSingleQuotes(today) 
 	.appendAnd().appendLeftParenthesis().append("cm.removed_date is null")
 	.appendOr().append("cm.removed_date").appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis() 
@@ -132,7 +133,7 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	.appendAndEquals("cm.sch_school_type_id", schoolTypeId)
 	.appendAndEquals("cm.ic_user_id", "u." + uIdName)
 	.appendAndEquals("u." + uIdName, "ua.ic_user_id")
-	.appendAndEquals("au.ic_address_id", "a." + aIdName)
+	.appendAndEquals("ua.ic_address_id", "a." + aIdName)
 	.appendAndEquals("a.ic_commune_id", communeId)
 	.appendAnd().appendLeftParenthesis().append("rp." + ENDDATE + " is null")
 	.appendOr().append("rp." + ENDDATE).appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis();

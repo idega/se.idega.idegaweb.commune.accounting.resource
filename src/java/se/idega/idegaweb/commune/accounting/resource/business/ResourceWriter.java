@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.9 2004/03/22 07:43:14 anders Exp $
+ * $Id: ResourceWriter.java,v 1.10 2004/03/23 10:39:43 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -10,6 +10,7 @@
 package se.idega.idegaweb.commune.accounting.resource.business;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -23,8 +24,10 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import se.idega.idegaweb.commune.accounting.presentation.AccountingBlock;
+import se.idega.idegaweb.commune.accounting.resource.data.Resource;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMember;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMemberHome;
+import se.idega.idegaweb.commune.accounting.resource.data.ResourceHome;
 import se.idega.idegaweb.commune.business.CommuneUserBusiness;
 import se.idega.idegaweb.commune.school.data.CurrentSchoolSeason;
 import se.idega.idegaweb.commune.school.data.CurrentSchoolSeasonHome;
@@ -35,7 +38,10 @@ import com.idega.block.school.business.SchoolBusiness;
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolClass;
 import com.idega.block.school.data.SchoolClassMember;
+import com.idega.block.school.data.SchoolManagementType;
+import com.idega.block.school.data.SchoolManagementTypeHome;
 import com.idega.block.school.data.SchoolSeason;
+import com.idega.block.school.data.SchoolType;
 import com.idega.block.school.data.SchoolYear;
 import com.idega.business.IBOLookup;
 import com.idega.core.contact.data.Email;
@@ -63,20 +69,25 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/22 07:43:14 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/23 10:39:43 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ResourceWriter {
 
 	private final static String EXPORT_FOLDER_NAME = "Export Files";
 
-	private final int RESOURCE_ID_NATIVE_LANGUAGE_1 = 30;
-	private final int RESOURCE_ID_NATIVE_LANGUAGE_2 = 31;
+	private final static int RESOURCE_ID_NATIVE_LANGUAGE_1 = 30;
+	private final static int RESOURCE_ID_NATIVE_LANGUAGE_2 = 31;
+	
+	public final static int TYPE_NATIVE_LANGUAGE_CHOICE_LIST = 1;
+	public final static int TYPE_NATIVE_LANGUAGE_PLACEMENT_LIST = 2;
+	public final static int TYPE_MANAGEMENT_TYPE_RESOURCE_LIST = 3;
 
 	Table _table = null;
 	String _filename = null;
+	HSSFCellStyle _headerStyle = null;
 	
 	/**
 	 * Constructs a resource writer object.
@@ -87,8 +98,20 @@ public class ResourceWriter {
 	
 	/**
 	 * Creates a resource export file.
+	 * @param isSchoolChoice true if school choice file, false if placement file
 	 */
 	public ICFile createFile(IWContext iwc, boolean isSchoolChoice) {
+		if (isSchoolChoice) {
+			return createFile(iwc, TYPE_NATIVE_LANGUAGE_CHOICE_LIST);
+		} else {
+			return createFile(iwc, TYPE_NATIVE_LANGUAGE_PLACEMENT_LIST);
+		}
+	}
+	
+	/**
+	 * Creates a resource export file according to the specified list type.
+	 */
+	public ICFile createFile(IWContext iwc, int listType) {
 		ICFile reportFolder = null;
 		ICFileHome fileHome = null;
 
@@ -116,10 +139,16 @@ public class ResourceWriter {
 				
 		try {
 			MemoryFileBuffer buffer = null;
-			if (isSchoolChoice) {
-				buffer = getNativeLanguageSchoolChoiceBuffer(iwc);
-			} else {
-				buffer = getNativeLanguageBuffer(iwc);
+			switch (listType) {
+				case TYPE_NATIVE_LANGUAGE_CHOICE_LIST:
+					buffer = getNativeLanguageSchoolChoiceBuffer(iwc);
+					break;
+				case TYPE_NATIVE_LANGUAGE_PLACEMENT_LIST:
+					buffer = getNativeLanguageBuffer(iwc);
+					break;
+				case TYPE_MANAGEMENT_TYPE_RESOURCE_LIST:
+					buffer = getManagementTypeResourceBuffer(iwc);
+					break;
 			}
 			MemoryInputStream mis = new MemoryInputStream(buffer);
 			try {
@@ -520,6 +549,109 @@ public class ResourceWriter {
 			e.printStackTrace();
 		}
 		return buffer;
+	}
+
+	/*
+	 * Returns XLS buffer with management type resource list. 
+	 */
+	private MemoryFileBuffer getManagementTypeResourceBuffer(IWContext iwc) {
+		MemoryFileBuffer buffer = null;
+		try {
+			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
+
+			SchoolBusiness sb = getSchoolBusiness(iwc);
+			String[] categories = new String[2];
+			categories[0] = sb.getElementarySchoolSchoolCategory();
+			categories[1] = sb.getHighSchoolSchoolCategory();
+			
+			SchoolManagementTypeHome smtHome = (SchoolManagementTypeHome) IDOLookup.getHome(SchoolManagementType.class);
+			Collection managementTypes = smtHome.findManagementTypesByCategories(categories);
+			
+			SchoolSeason season = sb.getCurrentSchoolSeason();
+			int seasonId = ((Integer) season.getPrimaryKey()).intValue();
+			
+			CommuneHome communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);
+			Commune homeCommune = communeHome.findDefaultCommune();
+			int homeCommuneId = ((Integer) homeCommune.getPrimaryKey()).intValue();
+
+			buffer = new MemoryFileBuffer();
+			MemoryOutputStream mos = new MemoryOutputStream(buffer);
+	
+			HSSFWorkbook wb = new HSSFWorkbook();
+			HSSFSheet sheet = wb.createSheet(_filename);
+
+			sheet.setColumnWidth((short) 0, (short) (30 * 256));
+			sheet.setColumnWidth((short) 1, (short) (10 * 256));
+			
+			HSSFFont font = wb.createFont();
+			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+			font.setFontHeightInPoints((short)12);
+			_headerStyle = wb.createCellStyle();
+			_headerStyle.setFont(font);
+
+			Collection schoolTypes = new ArrayList();
+			schoolTypes.addAll(sb.findAllSchoolTypesInCategory(categories[0], false));
+			schoolTypes.addAll(sb.findAllSchoolTypesInCategory(categories[1], false));
+
+			Iterator iter = managementTypes.iterator();
+			int cellRow = 0;
+			while (iter.hasNext()) {
+				SchoolManagementType managementType = (SchoolManagementType) iter.next();
+				cellRow = listResources(sheet, iwrb, managementType, schoolTypes, seasonId, homeCommuneId, cellRow); 
+			}
+			
+			wb.write(mos);
+			buffer.setMimeType("application/vnd.ms-excel");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return buffer;			
+	}
+	
+	private int listResources(
+				HSSFSheet sheet,
+				IWResourceBundle iwrb,
+				SchoolManagementType managementType,
+				Collection schoolTypes,
+				int seasonId,
+				int homeCommuneId,
+				int cellRow) throws Exception {
+		
+		
+		HSSFRow row = sheet.createRow((short) cellRow++);			
+		HSSFCell cell = row.createCell((short) 0);
+		cell.setCellValue(iwrb.getLocalizedString("resource.management_type", "Management type") + ": " +
+				iwrb.getLocalizedString(managementType.getLocalizedKey(), managementType.getLocalizedKey()).toUpperCase());
+		cell.setCellStyle(_headerStyle);
+		
+		ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
+		ResourceClassMemberHome rcmHome = (ResourceClassMemberHome) IDOLookup.getHome(ResourceClassMember.class);
+
+		Iterator iter = schoolTypes.iterator();
+		while (iter.hasNext()) {
+			SchoolType st = (SchoolType) iter.next();
+			int schoolTypeId = ((Integer) st.getPrimaryKey()).intValue();
+			row = sheet.createRow((short) cellRow++);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(iwrb.getLocalizedString("resource.school_type", "Operation") + ": " + st.getName());
+			cell.setCellStyle(_headerStyle);
+			
+			Collection resources = rHome.findBySchoolType(schoolTypeId);
+			Iterator resourcesIter = resources.iterator();
+			while (resourcesIter.hasNext()) {
+				Resource resource = (Resource) resourcesIter.next();
+				int resourceId = ((Integer) resource.getPrimaryKey()).intValue();
+				row = sheet.createRow((short) cellRow++);
+				cell = row.createCell((short) 0);
+				cell.setCellValue(resource.getResourceName());
+				
+				int studentCount = rcmHome.countByRscSchoolTypeSeasonAndCommune(resourceId, schoolTypeId, seasonId, homeCommuneId);
+				cell = row.createCell((short) 1);
+				cell.setCellValue("" + studentCount);				
+			}
+		}
+		return cellRow;
 	}
 
 	protected CommuneUserBusiness getCommuneUserBusiness(IWApplicationContext iwc) throws RemoteException {

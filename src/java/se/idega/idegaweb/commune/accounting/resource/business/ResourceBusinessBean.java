@@ -171,7 +171,7 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     try {
       mbr = getSchoolClassMember(clsMemberID);
       schClass = mbr.getSchoolClass();
-      clsYearID = schClass.getSchoolYearId();
+      clsYearID = mbr.getSchoolYearId();
       clsTypeID = schClass.getSchoolTypeId();
       
       // Loop resources and check if the year and type match the SchoolClassMember(placement)      

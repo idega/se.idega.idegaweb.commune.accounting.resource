@@ -7,6 +7,8 @@
 package se.idega.idegaweb.commune.accounting.resource.business;
 
 import java.rmi.RemoteException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +24,8 @@ import se.idega.idegaweb.commune.accounting.resource.data.Resource;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceHome;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermission;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermissionHome;
+import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMember;
+import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMemberHome;
 
 import com.idega.block.school.data.SchoolType;
 import com.idega.block.school.data.SchoolTypeHome;
@@ -32,6 +36,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.util.IWTimestamp;
 
 /**
  * @author Göran Borgman
@@ -231,7 +236,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
   }
   
   /**
-   * Saves a ResourcPermission to DB
+   * Saves a ResourcePermission to DB
    * @param rscId The requested ResourcePermissions related Resourceid. 
    * @param grpId The requested ResourcePermissions related Groupid.
    * @param canAssign If this group has permission to assign related Resource to a childs Placement
@@ -247,6 +252,57 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
       permBmp.setGroupFK(grpId);
       permBmp.store();      
   }
+
+  /**
+   * Saves a ResourcePlacement to DB
+   * @param rscId The ResourceID. 
+   * @param grpId The SchoolPlacements SchoolClassMemberID.
+   * @param startDate Startdate of this ResourcePlacement
+   * @param endDate Enddate of this ResourcePlacement
+   */
+  public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr)  throws RemoteException {
+      ResourceClassMemberHome rscPermHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+      try {
+        IWTimestamp today = IWTimestamp.RightNow();
+        today.setAsDate();    
+        Date startDate = null;
+        Date endDate = null;
+        if (!startDateStr.equals("")) {
+          IWTimestamp start = new IWTimestamp(startDateStr);
+          start.setAsDate();
+          if (start.isEarlierThan(today)) {
+            String tmpStr = start.toString();
+            String m = tmpStr;
+          } else {
+            startDate = start.getDate();
+          }
+        }
+        if (!endDateStr.equals("")) {
+          IWTimestamp end = new IWTimestamp(endDateStr);
+          end.setAsDate();
+          if (end.isEarlierThan(today)) {
+            String tmpStr = end.toString();
+            String m = tmpStr;
+          } else {
+            endDate = end.getDate();
+          }
+        }
+         
+               
+        ResourceClassMember rscMemberBmp = rscPermHome.create();
+        rscMemberBmp.setResourceFK(rscId);
+        rscMemberBmp.setMemberFK(memberId);
+        rscMemberBmp.setStartDate(startDate);
+        if (endDate != null) {
+          rscMemberBmp.setEndDate(endDate);
+        }
+        rscMemberBmp.store();
+      }
+      catch (javax.ejb.CreateException ce) {
+        throw new java.rmi.RemoteException(ce.getMessage());
+      }            
+  }  
+  
   
   /**
    * Delete all ResourcPermissions related to Resource with id rscId

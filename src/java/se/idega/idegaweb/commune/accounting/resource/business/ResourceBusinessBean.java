@@ -469,7 +469,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
    */
-	public ResourceClassMember createResourcePlacement(int rscId, int memberId, String startDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+	public ResourceClassMember createResourcePlacement(int rscId, int memberId, String startDateStr)  throws RemoteException {
 		ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
 		Date startDate = null;
 		ResourceClassMember rscMemberBmp = null;

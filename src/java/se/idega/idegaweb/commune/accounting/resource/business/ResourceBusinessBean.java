@@ -176,7 +176,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
     	// grpID is -7, means used by central admin
     	possibleRscs = findAllResources();
     else   
-    	getAssignRightResourcesForGroup(grpID);
+    	possibleRscs = getAssignRightResourcesForGroup(grpID);
 
     try {
       mbr = getSchoolClassMember(clsMemberID);

@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.3 2004/03/16 14:40:51 anders Exp $
+ * $Id: ResourceWriter.java,v 1.4 2004/03/16 16:27:43 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -59,10 +59,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/16 14:40:51 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/16 16:27:43 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ResourceWriter {
 
@@ -225,6 +225,9 @@ public class ResourceWriter {
 				SchoolClassMember placement = resourceMember.getSchoolClassMember();
 				SchoolYear schoolYear = placement.getSchoolYear();
 				User student = placement.getStudent();
+				if (student == null) {
+					continue;
+				}
 				SchoolClass schoolClass = placement.getSchoolClass();
 				School school = schoolClass.getSchool();
 				Address address = getCommuneUserBusiness(iwc).getUsersMainAddress(student);

@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.8 2004/03/18 13:23:11 laddi Exp $
+ * $Id: ResourceWriter.java,v 1.9 2004/03/22 07:43:14 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -63,10 +63,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/18 13:23:11 $ by $Author: laddi $
+ * Last modified: $Date: 2004/03/22 07:43:14 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ResourceWriter {
 
@@ -402,7 +402,7 @@ public class ResourceWriter {
 			cell.setCellValue(iwrb.getLocalizedString("resource.school_class", "School Class"));
 			cell.setCellStyle(style);
 			cell = row.createCell((short)cellColumn++);
-			cell.setCellValue(iwrb.getLocalizedString("resource.native_language", "Native Language"));
+			cell.setCellValue(iwrb.getLocalizedString("resource.native_language_choice", "Native Language choice"));
 			cell.setCellStyle(style);
 	
 			Iterator iter = schoolChoices.iterator();

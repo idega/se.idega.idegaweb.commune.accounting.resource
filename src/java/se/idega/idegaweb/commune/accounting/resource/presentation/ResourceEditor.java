@@ -10,9 +10,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
-
-import javax.ejb.RemoveException;
 
 import se.idega.idegaweb.commune.accounting.presentation.AccountingBlock;
 import se.idega.idegaweb.commune.accounting.presentation.ApplicationForm;
@@ -78,7 +75,7 @@ public class ResourceEditor extends AccountingBlock {
   private static final String KEY_FORM_LABEL_SCHOOLYEARS = KP + "form_label.schoolyears";
   private static final String KEY_BUTTON_NEW = KP + "button.new";
   private static final String KEY_BUTTON_SAVE = KP + "button.save";
-  private static final String KEY_BUTTON_DELETE = KP + "button.delete";
+  //private static final String KEY_BUTTON_DELETE = KP + "button.delete";
   private static final String KEY_BUTTON_CANCEL = KP + "button.cancel";
   private static final String KEY_DROPDOWN_COMMUNE = KP + "dropdown.commune";
   private static final String KEY_DROPDOWN_PROVIDER = KP + "dropdown.provider";
@@ -107,23 +104,23 @@ public class ResourceEditor extends AccountingBlock {
       // We have the group ids. Now do what the parameters say
       if (iwc.isParameterSet(PARAM_RSC_SAVE)) {
         saveResource(iwc);
-        add(getRscList(iwc));
+        add(getRscList());
       } else if (iwc.isParameterSet(PARAM_RSC_DELETE)) {
         deleteResource(iwc);
-        add(getRscList(iwc));
+        add(getRscList());
       } else if (iwc.isParameterSet(PARAM_RSC_NEW)) {
-        add(getRscForm(iwc, null));
+        add(getRscForm(null));
       } else if (iwc.isParameterSet(PARAM_RSC_EDIT)) {
-        add(getRscForm(iwc, iwc.getParameter(PARAM_RSC_EDIT)));      
+        add(getRscForm(iwc.getParameter(PARAM_RSC_EDIT)));      
       } else {
         // Show - List Resources page
-        add(getRscList(iwc));
+        add(getRscList());
         
       }
     }
   }
   
-  public PresentationObject getRscList(IWContext iwc) throws RemoteException {
+  public PresentationObject getRscList() throws RemoteException {
     ApplicationForm app = new ApplicationForm(this);
     
     // *** Title ***
@@ -146,7 +143,6 @@ public class ResourceEditor extends AccountingBlock {
       L.setParameter(PARAM_RSC_EDIT, primKey);
       LT.add(L);
       // Get delete button      
-      String toolTip = localize(KEY_BUTTON_DELETE, "Radera");
       Image delImg = getDeleteIcon("Test tooltip");
       SubmitButton delButt = new SubmitButton(delImg, PARAM_RSC_DELETE, primKey);
       String tmpRscName = elem.getResourceName();
@@ -165,7 +161,7 @@ public class ResourceEditor extends AccountingBlock {
     return app;
   }
   
-  public PresentationObject getRscForm(IWContext iwc, String rscIdStr) throws java.rmi.RemoteException {
+  public PresentationObject getRscForm(String rscIdStr) throws java.rmi.RemoteException {
     ApplicationForm app = new ApplicationForm(this);
     
     // *** Title ***
@@ -196,7 +192,6 @@ public class ResourceEditor extends AccountingBlock {
     }
     T.add(rscNameInput, 2, row++);
     // Assign Permission
-    Vector permissionVec = new Vector();
     DropdownMenu assignDropdown = new DropdownMenu(PARAM_RSC_ASSIGN);
             // Get translations for dropdowns
     String communeString = (getLocalizedText(KEY_DROPDOWN_COMMUNE, "Centralt")).toString();
@@ -206,7 +201,6 @@ public class ResourceEditor extends AccountingBlock {
     assignDropdown.setSelectedElement(commune_admin_group_id);
     T.add(assignDropdown, 2, row++);
     // View Permission
-    Vector viewPermVec = new Vector();
     DropdownMenu viewDropdown = new DropdownMenu(PARAM_RSC_VIEW);
     viewDropdown.addMenuElement(commune_admin_group_id, communeString);
     viewDropdown.addMenuElement(provider_group_id, providerString);
@@ -404,12 +398,14 @@ public class ResourceEditor extends AccountingBlock {
     busyBean.saveResourcePermission(rscId, grpId, permitAssign, permitView);
   }
   
+/*
   private void deletePermission(Integer rscId, Integer grpId) throws RemoteException, RemoveException {
     ResourcePermission rPerm = busyBean.getRscPermByRscAndGrpId(rscId, grpId);
     if (rPerm != null) {
         rPerm.remove();    
     }    
   }
+*/
  
   public int[] getIntArrFromStrArr(String[] strInts) {
     int[] ints;

@@ -158,7 +158,6 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     Collection rscColl = null;
 		ResourcePermissionHome rpHome = (ResourcePermissionHome) getIDOHome(ResourcePermission.class);
     rscColl = rpHome.findAllRscPermByRscId(rscId);
-    int collSize = rscColl.size();
     for (Iterator iter = rscColl.iterator(); iter.hasNext();) {
 			ResourcePermission element = (ResourcePermission) iter.next();
 			element.remove();
@@ -172,7 +171,7 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
       typeMap = new HashMap(rscColl.size());
       for (Iterator iter = rscColl.iterator(); iter.hasNext();) {
 				SchoolType aType = (SchoolType) iter.next();
-        typeMap.put((Integer) aType.getPrimaryKey(), aType);				
+        typeMap.put(aType.getPrimaryKey(), aType);				
 			}        
 			return typeMap;
 		} catch (IDORelationshipException e) {
@@ -188,7 +187,7 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
       yearMap = new HashMap(rscColl.size());
       for (Iterator iter = rscColl.iterator(); iter.hasNext();) {
         SchoolYear aYear = (SchoolYear) iter.next();
-        yearMap.put((Integer) aYear.getPrimaryKey(), aYear);        
+        yearMap.put(aYear.getPrimaryKey(), aYear);        
       }        
       return yearMap;
     } catch (IDORelationshipException e) {

@@ -151,6 +151,13 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
     return rscColl;
   }
   
+  /**
+   * Returns a Collection of Resources related to a placements school year and type, and with 
+   * rights to assign the Resource for the given group id.
+   * 
+   * @param grpID The Group id 
+   * @param clsMemberID The SchoolClassMember(placement) id
+   */
   public Collection getAssignableResourcesForPlacement(Integer grpID,  Integer clsMemberID) {
     Collection possibleRscs = getAssignRightResourcesForGroup(grpID);
     Collection  validRscs = new Vector();
@@ -208,6 +215,63 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 		}
     return validRscs;
   }
+
+  /**
+   * Returns a Collection of Resources related to the given school year and type.
+   * @param yearID The school year id
+   * @param typeID The school type id
+   */
+  public Collection getAssignableResourcesByYearAndType(String yearIdStr, String typeIdStr) {
+    Collection possibleRscs = findAllResources();
+    Collection  validRscs = new Vector();
+
+    try {
+      // Loop resources and check if the year and type match      
+      for (Iterator iter = possibleRscs.iterator(); iter.hasNext();) {
+        boolean hasYear = false;
+        boolean hasType = false;
+        Resource theRsc = (Resource) iter.next();
+        
+        // if the group/class has no schoolyear, don't match year, just set hasYear to true
+        if (yearIdStr != null) {
+          int yearID = Integer.parseInt(yearIdStr);
+          Collection rscYears = theRsc.findRelatedSchoolYears();
+          // Check if the resource has the placement's/schoolClass'es school year
+          for (Iterator iterator = rscYears.iterator(); iterator.hasNext();) {
+            SchoolYear theYear = (SchoolYear) iterator.next();
+            Integer PK = (Integer) theYear.getPrimaryKey();
+            if (yearID == PK.intValue()) {
+              hasYear = true;
+              break;
+            }
+          }
+        }
+        
+        if (typeIdStr != null) {
+          int typeID = Integer.parseInt(typeIdStr);
+          Collection rscTypes = theRsc.findRelatedSchoolTypes();
+          // Check if the resource has the placement's/schoolClass'es school year
+          for (Iterator iterator = rscTypes.iterator(); iterator.hasNext();) {
+            SchoolType theType = (SchoolType) iterator.next();
+            Integer PK = (Integer) theType.getPrimaryKey();
+            if (typeID == PK.intValue()) {
+              hasType = true;
+              break;
+            }         
+          }
+        }
+              
+        // if the Resource has the year and type. Add to validRscs          
+        if (hasYear  && hasType) {
+          validRscs.add(theRsc);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return validRscs;
+  }
+
   
   public SchoolClassMember getSchoolClassMember(Integer memberID) {
     SchoolClassMember mbr = null;

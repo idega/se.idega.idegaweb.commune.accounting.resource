@@ -126,8 +126,8 @@ public class ResourceEditor extends AccountingBlock {
     app.setLocalizedTitle(KEY_TITLE1, "Administration resurs");    
     // *** Search Panel ***
     Table searchTable = new Table();
-    searchTable.add(getLocalizedHeader(KEY_MAIN_ACTIVITY, "Huvudverksamhet: "), 1, 1);
-    searchTable.add(getLocalizedText(KEY_SCHOOL, "Skola"), 2, 1);
+    searchTable.add(getSmallHeader(localize(KEY_MAIN_ACTIVITY, "Huvudverksamhet: ")), 1, 1);
+    searchTable.add(getSmallText(localize(KEY_SCHOOL, "Skola")), 2, 1);
     app.setSearchPanel(searchTable);    
     //*** Main Panel ***
     ListTable LT = new ListTable(this, 2);
@@ -137,7 +137,7 @@ public class ResourceEditor extends AccountingBlock {
     Collection rscList = busyBean.findAllResources();
     for (Iterator iter = rscList.iterator(); iter.hasNext();) {
 			ResourceBMPBean elem = (ResourceBMPBean) iter.next();
-      Link L = new Link(elem.getResourceName());
+      Link L = getSmallLink(elem.getResourceName());
       String primKey = ((Integer) elem.getPrimaryKey()).toString();
       L.setParameter(PARAM_RSC_EDIT, primKey);
       LT.add(L);
@@ -370,7 +370,6 @@ public class ResourceEditor extends AccountingBlock {
   }
   
   public void init(IWContext iwc) throws Exception {
-    //iwb = getBundle(iwc);
     iwrb = getResourceBundle(iwc);
     tFormat = TextFormat.getInstance();
     control(iwc);    

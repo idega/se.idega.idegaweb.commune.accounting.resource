@@ -5,6 +5,7 @@ public interface ResourceBusiness extends com.idega.business.IBOService
 {
  public void createResource(java.lang.String p0,int[] p1,int[] p2)throws java.rmi.RemoteException,javax.ejb.CreateException, java.rmi.RemoteException;
  public void createResourcePermission(int p0,int p1,boolean p2,boolean p3)throws java.rmi.RemoteException,javax.ejb.CreateException, java.rmi.RemoteException;
+ public void createResourcePlacement(int p0,int p1,java.lang.String p2,java.lang.String p3)throws java.rmi.RemoteException, java.rmi.RemoteException;
  public void deletePermissionsForResource(java.lang.Integer p0)throws java.rmi.RemoteException,javax.ejb.FinderException,javax.ejb.RemoveException, java.rmi.RemoteException;
  public java.util.Collection findAllResources() throws java.rmi.RemoteException;
  public java.util.Collection findAllSchoolTypes() throws java.rmi.RemoteException;

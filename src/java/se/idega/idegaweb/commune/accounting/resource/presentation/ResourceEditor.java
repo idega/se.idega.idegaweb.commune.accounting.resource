@@ -243,7 +243,7 @@ public class ResourceEditor extends AccountingBlock {
         }
       }
       typeTable.add(cBox, 1, typeRow);
-      typeTable.addText(loopItem.getSchoolTypeName(), 2, typeRow);    
+      typeTable.add(getSmallText(loopItem.getSchoolTypeName()), 2, typeRow);    
       typeRow++;
     }
     T.mergeCells( 1, row, 2, row);

@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.12 2004/03/30 08:41:05 anders Exp $
+ * $Id: ResourceWriter.java,v 1.13 2004/03/30 09:33:32 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -69,10 +69,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/30 08:41:05 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/30 09:33:32 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ResourceWriter {
 
@@ -581,7 +581,8 @@ public class ResourceWriter {
 			HSSFSheet sheet = wb.createSheet(_filename);
 
 			sheet.setColumnWidth((short) 0, (short) (30 * 256));
-			sheet.setColumnWidth((short) 1, (short) (10 * 256));
+			sheet.setColumnWidth((short) 1, (short) (20 * 256));
+			sheet.setColumnWidth((short) 2, (short) (10 * 256));
 			
 			HSSFFont font = wb.createFont();
 			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);

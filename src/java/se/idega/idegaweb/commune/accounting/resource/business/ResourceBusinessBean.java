@@ -513,15 +513,17 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * @param grpId The SchoolPlacements SchoolClassMemberID.
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
+   * @param isCentralAdmin check validity of start date if user is a provider
    */
-  public void createResourcePlacement(int rscId, int schClsMbrID, String startDateStr, String endDateStr, boolean doCheckStartDate)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+  public void createResourcePlacement(int rscId, int schClsMbrID, String startDateStr, String endDateStr, boolean isCentralAdmin)  throws RemoteException, DateException, ResourceException, ClassMemberException {
       ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
       try {
         IWTimestamp today = IWTimestamp.RightNow();
         today.setAsDate();    
         Date startDate = null;
         Date endDate = null;
-        IWTimestamp start;
+        IWTimestamp start = null;
+        IWTimestamp end = null;
         
         // Check valid resource and placement
         if (rscId == -1) {
@@ -534,40 +536,56 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
             throw new ResourceException("cacc.rsc_placement.this_resource_already_placed", "This placement already have this resource");
           }
         }
+        
+        // Get dates from the school placement
+        IWTimestamp removed = null;
+        IWTimestamp registered = null;
+        SchoolClassMember schClsMbr = getSchoolClassMember(new Integer(schClsMbrID));
+        if (schClsMbr != null) {
+        	Timestamp remTS = schClsMbr.getRemovedDate();
+        	if (remTS != null)
+        		removed = new IWTimestamp(remTS.getTime());
+        	if (removed != null)
+        		removed.setAsDate();
+      	
+        	Timestamp regTS = schClsMbr.getRegisterDate();
+        	if (regTS != null)
+        		registered = new IWTimestamp(regTS);
+        	if (registered != null)
+        		registered.setAsDate();
+        }
+        
         // Check dates
         if (!startDateStr.equals("")) {
-          start= new IWTimestamp(startDateStr);
-          start.setAsDate();
-          if (doCheckStartDate && start.isEarlierThan(today)) {
-          	throw new DateException("cacc.rsc_placement.to_early_start_date", "Startdate can't be earlier than today");
-          } else {
-          	startDate = start.getDate();
-          }
+        	start= new IWTimestamp(startDateStr);
+        	start.setAsDate();
+        	if (!isCentralAdmin && start.isEarlierThan(today)) {
+        		throw new DateException("cacc.rsc_placement.to_early_start_date", "Startdate can't be earlier than today");
+        	} else {
+        		startDate = start.getDate();
+        	}
         } else {
-          throw new DateException("cacc.rsc_placement.must_enter_start_date", "You must chose a startdate");                
+        	throw new DateException("cacc.rsc_placement.must_enter_start_date", "You must chose a startdate");                
         }
+        
         if (!endDateStr.equals("")) {
-          IWTimestamp end = new IWTimestamp(endDateStr);
-          end.setAsDate();
-          
-          IWTimestamp removed = null;
-          SchoolClassMember schClsMbr = getSchoolClassMember(new Integer(schClsMbrID));
-          if (schClsMbr != null) {
-          	Timestamp remTS = schClsMbr.getRemovedDate();
-          	removed = new IWTimestamp(remTS.getTime());
-          	if (removed != null) {
-          		removed.setAsDate();
-          	}
-          }
-         
-          if (end.isEarlierThan(start)){
-            throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
-          } else if(removed != null && removed.isEarlierThan(end)) {
-          	throw new DateException("cacc.rsc_placement.enddate_later_than_removeddate", "Resource enddate can't be later than school placements enddate");
-          } else {
-            endDate = end.getDate();
-          }
+        	end = new IWTimestamp(endDateStr);
+        	end.setAsDate();
         }
+
+        // Check resource start date
+        if (end != null && end.isEarlierThan(start)){
+           throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
+        } else if (registered != null && start.isEarlierThan(registered)){
+           throw new DateException("cacc.rsc_placement.startdate_earlier_than_registereddate", "Resource start date can't be earlier than the placements startdate");            
+        // Check and set resource end date
+        } else if (end != null) { 
+        	if(removed != null && removed.isEarlierThan(end)) {
+          		throw new DateException("cacc.rsc_placement.enddate_later_than_removeddate", "Resource enddate can't be later than school placements enddate");
+          	}
+          	endDate = end.getDate();
+         } 
+
          
         // Store       
         ResourceClassMember rscMemberBmp = rscClMbrHome.create();
@@ -582,13 +600,30 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
       catch (javax.ejb.CreateException ce) {
         throw new java.rmi.RemoteException(ce.getMessage());
       }            
-  }   
+  } 
 
   /**
-   * Delete all ResourcPermissions related to Resource with id rscId
-   * @param rscId The requested ResourcePermissions related Resourceid.
+   * Sets end date of a resource placement
+   * 
+   * @param grpId The SchoolPlacements SchoolClassMemberID.
+   * @param rscId The ResourceID. 
+   * @param startDate Startdate of this ResourcePlacement
+   * @param endDate Enddate of this ResourcePlacement
    */
   public void finishResourceClassMember(Integer schClsMbrID, Integer rscClsMbrId, String startDateStr, String endDateStr) throws FinderException, RemoteException, DateException, ClassMemberException {
+    finishResourceClassMember(schClsMbrID, rscClsMbrId, startDateStr, endDateStr, false);
+  }
+
+  /**
+   * Sets end date of a resource placement
+   * 
+   * @param grpId The SchoolPlacements SchoolClassMemberID.
+   * @param rscId The ResourceID. 
+   * @param startDate Startdate of this ResourcePlacement
+   * @param endDate Enddate of this ResourcePlacement
+   * @param isCentralAdmin user central admin or not
+   */
+  public void finishResourceClassMember(Integer schClsMbrID, Integer rscClsMbrId, String startDateStr, String endDateStr, boolean isCentralAdmin) throws FinderException, RemoteException, DateException, ClassMemberException {
     ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
     ResourceClassMember  mbr = mHome.findByPrimaryKey(rscClsMbrId);
     IWTimestamp today = IWTimestamp.RightNow();
@@ -605,19 +640,29 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
       end.setAsDate();
 
       IWTimestamp removed = null;
+      IWTimestamp registered = null;
       SchoolClassMember schClsMbr = getSchoolClassMember(schClsMbrID);
       if (schClsMbr != null) {
       	Timestamp remTS = schClsMbr.getRemovedDate();
-      	removed = new IWTimestamp(remTS.getTime());
-      	if (removed != null) {
+      	if (remTS != null)
+      		removed = new IWTimestamp(remTS.getTime());
+      	if (removed != null)
       		removed.setAsDate();
-      	}
+
+      	Timestamp regTS = schClsMbr.getRegisterDate();
+      	if (regTS != null)
+      		registered = new IWTimestamp(regTS.getTime());
+      	if (registered != null)
+      		registered.setAsDate();
+      	
       }
            
-      if (end.isEarlierThan(today)) {
+      if (!isCentralAdmin && end.isEarlierThan(today)) {
         throw new DateException("cacc.rsc_placement.to_early_end_date", "Enddate can't be earlier than today");
       } else if (end.isEarlierThan(start)){
         throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
+      } else if (registered != null && end.isEarlierThan(registered)) {
+      	throw new DateException("cacc.rsc_placement.enddate_earlier_than_registereddate", "Resource enddate can't be earlier than school placements  start date");
       } else if(removed != null && removed.isEarlierThan(end)) {
       	throw new DateException("cacc.rsc_placement.enddate_later_than_removeddate", "Resource enddate can't be later than school placements enddate");
       } else {

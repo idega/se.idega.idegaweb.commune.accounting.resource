@@ -16,6 +16,7 @@ public interface ResourceBusiness extends com.idega.business.IBOService
  public java.util.Collection findAllSchoolCategories() throws java.rmi.RemoteException;
  public java.util.Collection findAllSchoolTypes() throws java.rmi.RemoteException;
  public java.util.Collection findAllSchoolYears() throws java.rmi.RemoteException;
+ public void finishResourceClassMember(java.lang.Integer p0,java.lang.Integer p1,java.lang.String p2,java.lang.String p3,boolean p4)throws javax.ejb.FinderException,java.rmi.RemoteException,se.idega.idegaweb.commune.accounting.resource.business.DateException,se.idega.idegaweb.commune.accounting.resource.business.ClassMemberException, java.rmi.RemoteException;
  public void finishResourceClassMember(java.lang.Integer p0,java.lang.Integer p1,java.lang.String p2,java.lang.String p3)throws javax.ejb.FinderException,java.rmi.RemoteException,se.idega.idegaweb.commune.accounting.resource.business.DateException,se.idega.idegaweb.commune.accounting.resource.business.ClassMemberException, java.rmi.RemoteException;
  public java.util.Collection getAssignRightResourcesForGroup(java.lang.Integer p0) throws java.rmi.RemoteException;
  public java.util.Collection getAssignableResourcesByYearAndType(java.lang.String p0,java.lang.String p1) throws java.rmi.RemoteException;

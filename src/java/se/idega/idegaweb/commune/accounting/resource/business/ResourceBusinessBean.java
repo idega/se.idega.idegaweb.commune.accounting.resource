@@ -31,16 +31,17 @@ import com.idega.business.IBOServiceBean;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
+import com.idega.data.IDORemoveRelationshipException;
 
 /**
  * @author Göran Borgman
  *
  * This Businessbean contains methods for Resourcehandling(resource in the School sense of the word).
  */
-public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBusiness {
+public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusiness {
   
   /**
-   * Returns a Collection with all instances of the class SchoolType from the DB.
+   * Returns a Collection with all instances of the Class SchoolType from the DB.
    */
   public Collection findAllSchoolTypes() {
     try {
@@ -54,7 +55,7 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
   }
   
   /**
-   * Returns a Collection with all instances of the class SchoolYear from the DB.
+   * Returns a Collection with all instances of the Class SchoolYear from the DB.
    */
    public Collection findAllSchoolYears() {
       try {
@@ -68,7 +69,7 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
   }
   
   /**
-   * Returns a Collection with all instances of the class accounting.Resource from the DB.
+   * Returns a Collection with all instances of the Class accounting.Resource from the DB.
    */  
   public Collection findAllResources() {
     try {
@@ -81,7 +82,7 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
   }
   
   /**
-   * Returns one instance of the class Resource from the DB, with param pk as primary key. 
+   * Returns one instance of the Class Resource from the DB, with param pk as primary key. 
    * @param pk An Integer object with the value of the primary key
    */  
   public Resource getResourceByPrimaryKey(Integer pk) {
@@ -95,7 +96,7 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
   }
   
   /**
-   * Returns one instance of the class Resource from the DB, with the unique name of param name
+   * Returns one instance of the Class Resource from the DB, with the unique name of param name
    * @param name The name of the requested Resource
    */
   public Resource getResourceByName(String name) {
@@ -112,35 +113,31 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
   }
   
   /**
-   * Saves a Resource to DB
-   * @param name the name of the Resource
-   * @param typeInts intArray of related SchoolTypes
-   * @param yearInts intArray of related SchoolYears
+   * Returns a Collection of Resources that providers are allowed to assign to a child
    */
-  public void saveResource(String name, int[] typeInts, int[] yearInts) {
-    UserTransaction trans = getSessionContext().getUserTransaction();
+  public Collection getProviderAssignRightResources(Integer grpId) {
+    Collection rscColl = null;
     try {
-			ResourceHome rscHome = (ResourceHome) getIDOHome(Resource.class);
-      Resource bmp = rscHome.create();
-      trans.begin();          // Start transaction
-      bmp.setResourceName(name);
-      bmp.store();
-      bmp.addSchoolTypes(typeInts);
-      bmp.addSchoolYears(yearInts);
-      trans.commit();       // Commit transaction
+      ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
+      rscColl = rHome.findAssignRightResourcesByGrpId(grpId);
     } catch (Exception e) {
       e.printStackTrace();
-      System.out.println(e.getMessage());
-      try {
-				trans.rollback();     // Rollback transaction
-			} catch (IllegalStateException e1) {
-				e1.printStackTrace();
-			} catch (SecurityException e1) {
-				e1.printStackTrace();
-			} catch (SystemException e1) {
-				e1.printStackTrace();
-			}
-    } 
+    }
+    return rscColl;
+  }
+
+  /**
+   * Returns a Collection of Resources that providers are allowed to view
+   */
+  public Collection getProviderViewRightResources(Integer grpId) {
+    Collection rscColl = null;
+    try {
+      ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
+      rscColl = rHome.findViewRightResourcesByGrpId(grpId);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return rscColl;
   }
   
   /**
@@ -171,6 +168,68 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     return rscPerm;
   }
   
+  public void saveResource(boolean isSavingExisting, String rscName, int[] typeInts, int[] yearInts, 
+                                          boolean permitAssign, boolean permitView, int grpId, int rscId) {
+    UserTransaction trans = getSessionContext().getUserTransaction();
+    try {
+       trans.begin();          // Start transaction                                        
+       // Handle Resource
+      Resource oldRsc = null;
+      if (isSavingExisting) {
+        // Remove old from relationships from db. 
+        oldRsc = getResourceByPrimaryKey(new Integer(rscId));
+        try {
+          oldRsc.removeAllSchoolTypes();
+          oldRsc.removeAllSchoolYears();
+        } catch (IDORemoveRelationshipException e) {
+          e.printStackTrace();
+        }
+        // Update resource fields
+        oldRsc.setResourceName(rscName);
+        oldRsc.addSchoolTypes(typeInts);
+        oldRsc.addSchoolYears(yearInts);
+        oldRsc.store(); 
+      } else {
+        // new rsc
+        createResource(rscName, typeInts, yearInts);    
+      }
+      // Handle ResourcePermission
+      Integer rscIdInteger = (Integer) getResourceByName(rscName).getPrimaryKey();
+      deletePermissionsForResource(rscIdInteger);
+      if (permitAssign || permitView) {         
+        createResourcePermission(rscIdInteger.intValue(), grpId, permitAssign, permitView);
+      }
+      trans.commit();       // Commit transaction
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+      try {
+        trans.rollback();     // Rollback transaction
+      } catch (IllegalStateException e1) {
+        e1.printStackTrace();
+      } catch (SecurityException e1) {
+        e1.printStackTrace();
+      } catch (SystemException e1) {
+        e1.printStackTrace();
+      }
+    }                         
+  }
+
+  /**
+   * Saves a Resource to DB
+   * @param name the name of the Resource
+   * @param typeInts intArray of related SchoolTypes
+   * @param yearInts intArray of related SchoolYears
+   */
+  public void createResource(String name, int[] typeInts, int[] yearInts) throws RemoteException, CreateException {
+      ResourceHome rscHome = (ResourceHome) getIDOHome(Resource.class);
+      Resource bmp = rscHome.create();
+      bmp.setResourceName(name);
+      bmp.store();
+      bmp.addSchoolTypes(typeInts);
+      bmp.addSchoolYears(yearInts);
+  }
+  
   /**
    * Saves a ResourcPermission to DB
    * @param rscId The requested ResourcePermissions related Resourceid. 
@@ -178,23 +237,15 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
    * @param canAssign If this group has permission to assign related Resource to a childs Placement
    * @param canView If this group has permission to view related Resource
    */
-  public void saveResourcePermission(int rscId, int grpId, boolean canAssign, boolean canView) {
-    try {
-      ResourcePermissionHome rscPermHome = 
-        (ResourcePermissionHome) getIDOHome(ResourcePermission.class);
+  public void createResourcePermission(int rscId, int grpId, boolean permitAssign, boolean permitView) 
+                                                                                                          throws RemoteException, CreateException {
+      ResourcePermissionHome rscPermHome = (ResourcePermissionHome) getIDOHome(ResourcePermission.class);
       ResourcePermission permBmp = rscPermHome.create();
-      permBmp.setPermitAssignResource(canAssign);
-      permBmp.setPermitViewResource(canView);
+      permBmp.setPermitAssignResource(permitAssign);
+      permBmp.setPermitViewResource(permitView);
       permBmp.setResourceFK(rscId);
       permBmp.setGroupFK(grpId);
-      permBmp.store();
-    } catch (CreateException ce) {
-        ce.printStackTrace();
-        System.out.println(ce.getMessage());
-    } catch (RemoteException re) {
-        re.printStackTrace();
-        System.out.println(re.getMessage());
-    }        
+      permBmp.store();      
   }
   
   /**

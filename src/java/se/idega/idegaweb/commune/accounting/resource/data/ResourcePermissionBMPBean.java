@@ -94,15 +94,15 @@ public class ResourcePermissionBMPBean extends GenericEntity implements Resource
     this.setColumn(RESOURCE, rscId);
   }
   
-  public void getResourceFK(Resource rsc) {
-    this.getIntColumnValue(RESOURCE);
+  public int getResourceFK() {
+    return this.getIntColumnValue(RESOURCE);
   }
 
   public void setGroupFK(int grpId) {
     this.setColumn(GROUP, grpId);
   }
   
-  public void getGroupFK(Group grp) {
-    this.getIntColumnValue(GROUP);
+  public int getGroupFK() {
+    return this.getIntColumnValue(GROUP);
   }
 }

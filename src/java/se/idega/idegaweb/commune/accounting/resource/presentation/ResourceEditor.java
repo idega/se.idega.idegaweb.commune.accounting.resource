@@ -24,7 +24,6 @@ import se.idega.idegaweb.commune.presentation.CommuneBlock;
 import com.idega.block.school.data.SchoolType;
 import com.idega.block.school.data.SchoolYear;
 import com.idega.business.IBOLookup;
-import com.idega.data.IDORemoveRelationshipException;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -51,9 +50,9 @@ public class ResourceEditor extends AccountingBlock {
 	TextFormat tFormat;
   ResourceBusiness busyBean;
   int provider_group_id;
-  int commune_admin_group_id;
+  int commune_admin_group_id = 0;   // Commune admin permissions is not saved to db. Has all rights always.
   boolean providerGroupIdExists = true;
-  boolean communeAdminGroupIdExists = true;
+  // boolean communeAdminGroupIdExists = true;
   CommuneBlock styleObj = new CommuneBlock();
 
   /********************** Bundle properties ********************/
@@ -312,74 +311,43 @@ public class ResourceEditor extends AccountingBlock {
     }   
 
     // if groupid is missing print error message
-    if (!(providerGroupIdExists && communeAdminGroupIdExists)) {      
+    if (!(providerGroupIdExists)) {      
       Table errT = new Table();
       int row = 1;
       if (!providerGroupIdExists) {
-        errT.add(new Text("Det finns ingen \"provider_administrators_group_id\"-property " + 
-                 "med gruppid för Anordnare i bundlet \"se.idega.idegaweb.commune\""),
+        errT.add(new Text(localize("cacc.resource.no.provider.id", "There is no \"provider_administrators_group_id\"-property " + 
+                 "with the ic_group_id for the providergroup in the bindle \"se.idega.idegaweb.commune\"")),
                  1, row++);
       }
       add(errT);
     }
 
-    //anordnareGroupIdExists = false;
-    //centraltGroupIdExists = false;
-    return (providerGroupIdExists && communeAdminGroupIdExists);
+    return (providerGroupIdExists);
   }
     
   private void saveResource(IWContext iwc) throws RemoteException {   
-    // PARAM_RSC_SAVE contains the current resource id or -1 if new rsc
     boolean isSavingExistingRsc = !("-1".equals(iwc.getParameter(PARAM_RSC_SAVE)));
-    Resource oldRsc = null;
     
-    if (isSavingExistingRsc) {
-      // Remove old from relationships from db. 
-      oldRsc = busyBean.getResourceByPrimaryKey(new Integer(iwc.getParameter(PARAM_RSC_SAVE)));
-      try {
-        oldRsc.removeAllSchoolTypes();
-        oldRsc.removeAllSchoolYears();
-			} catch (IDORemoveRelationshipException e) {
-				e.printStackTrace();
-			}
-    }
-    
-    //Save Resource BMP bean
+    // Get Resource BMP bean fields
+    String rscIdStr = iwc.getParameter(PARAM_RSC_SAVE);
+    // PARAM_RSC_SAVE contains the current resource id or -1 if new rsc
+    int rscId = Integer.parseInt(rscIdStr);
     String rscName = iwc.getParameter(PARAM_RSC_NAME);
     String[] schTypeArr = iwc.getParameterValues(PARAM_RSC_ACTIVITIES);
     String[] schYearArr = iwc.getParameterValues(PARAM_RSC_SCHOOLYEARS);
     int[] typeInts = getIntArrFromStrArr(schTypeArr);
     int[] yearInts = getIntArrFromStrArr(schYearArr);
-    if (isSavingExistingRsc) {
-      oldRsc.setResourceName(rscName);
-      oldRsc.addSchoolTypes(typeInts);
-      oldRsc.addSchoolYears(yearInts);
-      oldRsc.store();     
-    } else {
-      // new rsc
-      busyBean.saveResource(rscName, typeInts, yearInts);
-    }
-    // Save provider ResourcePermission BMP bean
+    
+    // Get ResourcePermission BMP bean fields
     String assignGrpIdStr = iwc.getParameter(PARAM_RSC_ASSIGN);
     String viewGrpIdStr = iwc.getParameter(PARAM_RSC_VIEW);
     int assignGrpId = Integer.parseInt(assignGrpIdStr);
     int viewGrpId = Integer.parseInt(viewGrpIdStr);
     boolean permitAssign = (assignGrpId == provider_group_id);
     boolean permitView = (viewGrpId == provider_group_id);
-    if (isSavingExistingRsc) {
-      // Try to get old ResourcePermission
-      Integer grpIdInteger = new Integer(provider_group_id); 
-      Integer rscIdInteger = (Integer) oldRsc.getPrimaryKey();
-      ResourcePermission oldRscPerm = 
-          busyBean.getRscPermByRscAndGrpId(rscIdInteger, grpIdInteger);
-      if (oldRscPerm != null) {
-        oldRscPerm.setPermitAssignResource(permitAssign);
-        oldRscPerm.setPermitViewResource(permitView);
-        oldRscPerm.store();
-      }
-    } else {
-      savePermission(rscName, provider_group_id, permitAssign, permitView);
-    }
+    // Save the resource
+    busyBean.saveResource(isSavingExistingRsc, rscName, typeInts, yearInts, 
+                                          permitAssign, permitView, provider_group_id, rscId);
   }
   
   public void deleteResource(IWContext iwc) throws RemoteException {
@@ -387,25 +355,6 @@ public class ResourceEditor extends AccountingBlock {
     Integer rscIdInteger = new Integer(rscIdStr);
     busyBean.removeResource(rscIdInteger);
   }
-  
-  private void savePermission(String rscName, int grpId, boolean permitAssign, boolean permitView) throws RemoteException {
-    Resource rsc = busyBean.getResourceByName(rscName);
-    Integer rscIdInteger = (Integer) rsc.getPrimaryKey();
-    int rscId = 0;
-    if (rscIdInteger != null) {
-      rscId = rscIdInteger.intValue();
-    }
-    busyBean.saveResourcePermission(rscId, grpId, permitAssign, permitView);
-  }
-  
-/*
-  private void deletePermission(Integer rscId, Integer grpId) throws RemoteException, RemoveException {
-    ResourcePermission rPerm = busyBean.getRscPermByRscAndGrpId(rscId, grpId);
-    if (rPerm != null) {
-        rPerm.remove();    
-    }    
-  }
-*/
  
   public int[] getIntArrFromStrArr(String[] strInts) {
     int[] ints;

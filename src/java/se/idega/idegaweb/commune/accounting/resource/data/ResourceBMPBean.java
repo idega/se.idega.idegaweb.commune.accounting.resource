@@ -52,16 +52,31 @@ public class ResourceBMPBean extends GenericEntity implements Resource {
     return super.idoFindPKsByQuery(query);        
   }
   
-/*  public Resource ejbFindResourceByPK(Integer rscId) throws FinderException{
-    return (Resource) super.ejbFindByPrimaryKey(rscId);
-  }*/
-  
   public Integer ejbFindResourceByName(String name) throws FinderException {
     IDOQuery q = this.idoQueryGetSelect();
     q.appendWhereEqualsQuoted(NAME, name); 
-    //String sql = "select * from CACC_RESOURCE where " + NAME + " = '" + name + "'";
-    //return (Resource) super.idoFindOnePKBySQL(sql);
+
     return (Integer) super.idoFindOnePKByQuery(q);    
+  }
+  
+  public Collection ejbFindViewRightResourcesByGrpId(Integer grpId) throws FinderException {
+    IDOQuery q = idoQuery();
+    q.append("select r.* from cacc_resource r, cacc_resource_permission rp ");
+    q.appendWhereEquals("r.cacc_resource_id", "rp.cacc_resource_id");
+    q.appendAndEquals("rp.ic_group_id", grpId);
+    q.appendAndEqualsQuoted("rp.permit_view_resource", "Y");   
+    
+    return idoFindPKsByQuery(q);
+  }
+
+  public Collection ejbFindAssignRightResourcesByGrpId(Integer grpId) throws FinderException {
+    IDOQuery q = idoQuery();
+    q.append("select r.* from cacc_resource r, cacc_resource_permission rp ");
+    q.appendWhereEquals("r.cacc_resource_id", "rp.cacc_resource_id");
+    q.appendAndEquals("rp.ic_group_id", grpId);
+    q.appendAndEqualsQuoted("rp.permit_assign_resource", "Y");  
+    
+    return idoFindPKsByQuery(q);
   }
   
   public String getResourceName() {

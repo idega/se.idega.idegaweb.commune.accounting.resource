@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.11 2004/03/24 08:28:21 anders Exp $
+ * $Id: ResourceWriter.java,v 1.12 2004/03/30 08:41:05 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -69,10 +69,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/24 08:28:21 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/30 08:41:05 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ResourceWriter {
 
@@ -624,6 +624,14 @@ public class ResourceWriter {
 		cell.setCellValue(iwrb.getLocalizedString("resource.management_type", "Management type") + ": " +
 				iwrb.getLocalizedString(managementType.getLocalizedKey(), managementType.getLocalizedKey()).toUpperCase());
 		cell.setCellStyle(_headerStyle);
+		if (cellRow == 1) {
+			cell = row.createCell((short) 1);
+			cell.setCellValue(iwrb.getLocalizedString("resource.commune_students", "Commune students"));
+			cell.setCellStyle(_headerStyle);
+			cell = row.createCell((short) 2);
+			cell.setCellValue(iwrb.getLocalizedString("resource.outside_commune_students", "Students outside commune"));
+			cell.setCellStyle(_headerStyle);
+		}
 		
 		ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
 		ResourceClassMemberHome rcmHome = (ResourceClassMemberHome) IDOLookup.getHome(ResourceClassMember.class);
@@ -646,9 +654,13 @@ public class ResourceWriter {
 				cell = row.createCell((short) 0);
 				cell.setCellValue(resource.getResourceName());
 				
-				int studentCount = rcmHome.countByRscSchoolTypeSeasonManagementTypeAndCommune(resourceId, schoolTypeId, seasonId, managementTypeId, homeCommuneId);
+				int communeStudentCount = rcmHome.countByRscSchoolTypeSeasonManagementTypeAndCommune(resourceId, schoolTypeId, seasonId, managementTypeId, homeCommuneId, false);
 				cell = row.createCell((short) 1);
-				cell.setCellValue("" + studentCount);				
+				cell.setCellValue("" + communeStudentCount);
+				
+				int outsideCommuneStudentCount = rcmHome.countByRscSchoolTypeSeasonManagementTypeAndCommune(resourceId, schoolTypeId, seasonId, managementTypeId, homeCommuneId, false);
+				cell = row.createCell((short) 2);
+				cell.setCellValue("" + outsideCommuneStudentCount);				
 			}
 		}
 		return cellRow;

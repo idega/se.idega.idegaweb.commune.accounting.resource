@@ -316,7 +316,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
     return rscPerm;
   }
   
-  public Collection getResourcePlacementByMemberId(Integer memberId) {
+  public Collection getResourcePlacementsByMemberId(Integer memberId) {
     Collection mColl = null;
     try {
       ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
@@ -419,22 +419,23 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
   }
   
   /**
-   * Creates and store a new ResourcePlacement to DB. No indata checks.
+   * Creates and stores a new ResourcePlacement to DB. No indata checks.
    * @param rscId The ResourceID. 
    * @param grpId The SchoolPlacements SchoolClassMemberID.
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
    */
-	public void createResourcePlacement(int rscId, int memberId, String startDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+	public ResourceClassMember createResourcePlacement(int rscId, int memberId, String startDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
 		ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
 		Date startDate = null;
+		ResourceClassMember rscMemberBmp = null;
 		if (!startDateStr.equals("")) {
 			IWTimestamp start= new IWTimestamp(startDateStr);
 			startDate = start.getDate();
 		}
 	
 		try {         
-			ResourceClassMember rscMemberBmp = rscClMbrHome.create();
+			rscMemberBmp = rscClMbrHome.create();
 			rscMemberBmp.setResourceFK(rscId);
 			rscMemberBmp.setMemberFK(memberId);
 			rscMemberBmp.setStartDate(startDate);
@@ -442,7 +443,8 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 		}
 		catch (javax.ejb.CreateException ce) {
 			throw new java.rmi.RemoteException(ce.getMessage());
-		}            
+		}
+		return rscMemberBmp;            
 	}   
 
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.17 2004/10/14 14:54:15 thomas Exp $
+ * $Id: ResourceWriter.java,v 1.18 2004/10/18 17:50:02 thomas Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -25,12 +25,12 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import se.idega.idegaweb.commune.accounting.presentation.AccountingBlock;
 import se.idega.idegaweb.commune.business.CommuneUserBusiness;
+import se.idega.idegaweb.commune.care.data.CurrentSchoolSeason;
+import se.idega.idegaweb.commune.care.data.CurrentSchoolSeasonHome;
 import se.idega.idegaweb.commune.care.resource.data.Resource;
 import se.idega.idegaweb.commune.care.resource.data.ResourceClassMember;
 import se.idega.idegaweb.commune.care.resource.data.ResourceClassMemberHome;
 import se.idega.idegaweb.commune.care.resource.data.ResourceHome;
-import se.idega.idegaweb.commune.school.data.CurrentSchoolSeason;
-import se.idega.idegaweb.commune.school.data.CurrentSchoolSeasonHome;
 import se.idega.idegaweb.commune.school.data.SchoolChoice;
 import se.idega.idegaweb.commune.school.data.SchoolChoiceHome;
 
@@ -69,10 +69,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/10/14 14:54:15 $ by $Author: thomas $
+ * Last modified: $Date: 2004/10/18 17:50:02 $ by $Author: thomas $
  *
  * @author Anders Lindman
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ResourceWriter {
 

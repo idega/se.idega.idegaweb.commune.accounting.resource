@@ -17,6 +17,7 @@ import se.idega.idegaweb.commune.accounting.presentation.ApplicationForm;
 import se.idega.idegaweb.commune.accounting.presentation.ButtonPanel;
 import se.idega.idegaweb.commune.accounting.presentation.ListTable;
 import se.idega.idegaweb.commune.accounting.resource.business.ResourceBusiness;
+import se.idega.idegaweb.commune.accounting.resource.business.ResourceException;
 import se.idega.idegaweb.commune.accounting.resource.data.Resource;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceBMPBean;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermission;
@@ -60,6 +61,7 @@ public class ResourceEditor extends AccountingBlock {
 	boolean providerGroupIdExists = true;
 	// boolean communeAdminGroupIdExists = true;
 	CommuneBlock styleObj = new CommuneBlock();
+	String errMsg = null;
 
 	/********************** Bundle properties ********************/
 	private static final String BUNDLE_NAME_COMMUNE = "se.idega.idegaweb.commune";
@@ -88,6 +90,10 @@ public class ResourceEditor extends AccountingBlock {
 	private static final String KEY_DROPDOWN_CHOSE_SCH_CAT = KP + "dropdown.chose.sch_category";
 	private static final String KEY_MSG_CONFIRM_DELETE_START = KP + "confirm.delete.resource.start";
 	private static final String KEY_MSG_CONFIRM_DELETE_END = KP + "confirm.delete.resource.end";
+	private static final String KEY_ERR_MSG_AT_LEAST_ONE_TYPE = KP + "err_msg.at_least_one_type";
+	private static final String KEY_ERR_MSG_YEAR_MISSING_FOR_TYPE = KP + "err_msg.year_missing_for_type";
+	private static final String KEY_ERR_MSG_TYPE_MISSING_FOR_YEAR = KP + "err_msg.type_missing_for_year";
+	private static final String KEY_ERR_MSG_NAME_MISSING = KP + "err_msg.name_missing";
 
 	/********************** Parameters *********************/
 	private static final String PP = "cacc_rsc_"; // Parameter prefix
@@ -109,9 +115,16 @@ public class ResourceEditor extends AccountingBlock {
 			// A groupid is missing. Error message is returned from getGroupIds()
 		} else {
 			// We have the group ids. Now do what the parameters say
-			if (iwc.isParameterSet(PARAM_RSC_SAVE)) {
-				saveResource(iwc);
+			if (iwc.isParameterSet(PARAM_RSC_CANCEL)) {
 				add(getRscList(iwc));
+			} else if (iwc.isParameterSet(PARAM_RSC_SAVE)) {
+				String tmpStr = saveResource(iwc);
+				if (tmpStr != null)
+					errMsg =  errMsg + tmpStr;
+				if (errMsg == null)
+					add(getRscList(iwc));
+				else
+					add(getRscForm(iwc, iwc.getParameter(PARAM_RSC_EDIT)));
 			} else if (iwc.isParameterSet(PARAM_RSC_DELETE)) {
 				deleteResource(iwc);
 				add(getRscList(iwc));
@@ -195,9 +208,18 @@ public class ResourceEditor extends AccountingBlock {
 		// *** Main Panel ***    
 		Table T = new Table();
 		int row = 1;
+		if (errMsg != null)
+			T.add(getSmallErrorText(errMsg), 1, 1);
+			T.mergeCells(1, row, 2, row);
+		row = 2;
 		Resource theRsc = null;
 		Integer theRscId = null;
 		if (rscIdStr != null) {
+			// Maintain PARAM_RSC_EDIT so form will remember it is saving existing, if errors in input.
+			HiddenInput editParam = new HiddenInput(PARAM_RSC_EDIT,
+																		   iwc.getParameter(PARAM_RSC_EDIT));
+			T.add(editParam, 1, 1);
+			
 			// This mean that an existing resource will be edited
 			theRscId = new Integer(rscIdStr);
 			theRsc = busyBean.getResourceByPrimaryKey(theRscId);
@@ -214,13 +236,18 @@ public class ResourceEditor extends AccountingBlock {
 		T.add(getLocalizedLabel(KEY_FORM_LABEL_ACTIVITIES, "Verksamheter"), 1, row++);
 
 		/*********** Get input objects ***********/
-		row = 1;
+		row = 2;
 		// Resource Name
 		TextInput rscNameInput = new TextInput(PARAM_RSC_NAME);
-		if (theRsc != null) {
+		if (iwc.isParameterSet(PARAM_RSC_NAME)) {
+			rscNameInput.setValue(iwc.getParameter(PARAM_RSC_NAME));
+		}
+		
+		//if (theRsc != null) {
 			// Existing Resource is being edited so unique name can not be changed 
 			//rscNameInput.setReadOnly(true);
-		}
+		//}
+		
 		T.add(rscNameInput, 2, row++);
 		// Assign Permission
 		DropdownMenu assignDropdown = new DropdownMenu(PARAM_RSC_ASSIGN);
@@ -230,12 +257,18 @@ public class ResourceEditor extends AccountingBlock {
 		assignDropdown.addMenuElement(commune_admin_group_id, communeString);
 		assignDropdown.addMenuElement(provider_group_id, providerString);
 		assignDropdown.setSelectedElement(commune_admin_group_id);
+		if (iwc.isParameterSet(PARAM_RSC_ASSIGN)) {
+			assignDropdown.setSelectedElement(iwc.getParameter(PARAM_RSC_ASSIGN));			
+		}
 		T.add(assignDropdown, 2, row++);
 		// View Permission
 		DropdownMenu viewDropdown = new DropdownMenu(PARAM_RSC_VIEW);
 		viewDropdown.addMenuElement(commune_admin_group_id, communeString);
 		viewDropdown.addMenuElement(provider_group_id, providerString);
 		viewDropdown.setSelectedElement(commune_admin_group_id);
+		if (iwc.isParameterSet(PARAM_RSC_VIEW)) {
+			viewDropdown.setSelectedElement(iwc.getParameter(PARAM_RSC_VIEW));			
+		}
 		T.add(viewDropdown, 2, row++);
 		/********** Set input values ************/
 		if (theRsc != null) {
@@ -257,7 +290,6 @@ public class ResourceEditor extends AccountingBlock {
 		// SchoolTypes checkbox table
 		Table typeTable = new Table();
 		Collection typeVec = busyBean.findAllSchoolTypes();
-		//CheckBox typeOrgBox = new CheckBox(PARAM_RSC_SCHOOLTYPES);
 		Map schoolTypeMap = null;
 		if (rscIdStr != null) {
 			schoolTypeMap = getSchoolTypeMap(iwc, rscIdStr);
@@ -270,10 +302,11 @@ public class ResourceEditor extends AccountingBlock {
 			schTypePK = (Integer) loopItem.getPrimaryKey();
 			String typeIdStr = schTypePK.toString();
 			CheckBox cBox = new CheckBox(PARAM_RSC_SCHOOLTYPES + typeIdStr, typeIdStr);
-			//cBox.setValue(schTypePK.intValue());
-
-			// Set related school types to checked
-			if (theRsc != null) {
+			if (iwc.isParameterSet(PARAM_RSC_SCHOOLTYPES + typeIdStr)) {
+				// Params are set, so we come back to form with errror msg
+				cBox.setChecked(true);
+			} else if (errMsg == null && theRsc != null) {				
+				// if errMsg we look only at incoming params and not the saved resource
 				Map typeMap = busyBean.getRelatedSchoolTypes(theRsc);
 				Set typeKeys = typeMap.keySet();
 				if (typeKeys.contains(schTypePK)) {
@@ -285,9 +318,8 @@ public class ResourceEditor extends AccountingBlock {
 
 			// *** Add horisontal SCHOOL YEAR TABLE if applicable on school type ***
 			int typeIdInt = -1;
-			if (schTypePK != null) {
-				typeIdInt = schTypePK.intValue();
-			}
+			typeIdInt = schTypePK.intValue();
+
 			Map schoolYearMap = null;
 			if (schoolTypeMap != null) {
 				schoolYearMap = (Map) schoolTypeMap.get(schTypePK.toString());
@@ -398,7 +430,20 @@ public class ResourceEditor extends AccountingBlock {
 			SchoolYear sy = (SchoolYear) iter.next();
 			String syId = sy.getPrimaryKey().toString();
 			CheckBox syCheckBox = new CheckBox(PARAM_RSC_SCHOOLYEARS + schoolTypeId, syId);
-			if (schoolYearMap != null && schoolYearMap.get(syId) != null) {
+			// Test
+			//String yearParam = PARAM_RSC_SCHOOLYEARS + schoolTypeId;
+			//String yearId = syId;
+			if (iwc.isParameterSet(PARAM_RSC_SCHOOLYEARS + schoolTypeId)) {
+				// Params are set, so we come back to form with errror msg
+				String[] yearArr = iwc.getParameterValues(PARAM_RSC_SCHOOLYEARS + schoolTypeId);
+				boolean hasYearInArray = false;
+				for (int i = 0; i < yearArr.length; i++) {
+					if (yearArr[i].equals(syId))
+					hasYearInArray = true;
+				}
+				syCheckBox.setChecked(hasYearInArray);
+			} else if (errMsg == null && schoolYearMap != null && schoolYearMap.get(syId) != null) {
+				// if errMsg we look only at incoming params and not the saved resource
 				syCheckBox.setChecked(true);
 			}
 			table.add(syCheckBox, col, 1);
@@ -477,6 +522,51 @@ public class ResourceEditor extends AccountingBlock {
 		return schoolTypeMap;
 	}
 
+	private Map getSchoolTypeParamMapErrMsg(IWContext iwc) throws ResourceException, RemoteException {
+		Collection schTypes = getSchoolTypes(iwc);
+		Iterator iter = schTypes.iterator();
+		Map schoolTypeMap = new TreeMap();
+		int numberOfCheckedTypes = 0;
+		while (iter.hasNext()) {
+			SchoolType st = (SchoolType) iter.next();
+			String stId = st.getPrimaryKey().toString();
+			if (iwc.isParameterSet(PARAM_RSC_SCHOOLTYPES + stId)) {
+				numberOfCheckedTypes++;
+				Map schoolYearMap = new TreeMap();
+				String[] schoolYearIds = iwc.getParameterValues(PARAM_RSC_SCHOOLYEARS + stId);
+				if (schoolYearIds != null) {
+					for (int i = 0; i < schoolYearIds.length; i++) {
+						schoolYearMap.put(schoolYearIds[i], schoolYearIds[i]);
+					}
+				} else {
+					Collection years = 
+								getSchoolBusiness(iwc).findAllSchoolYearsBySchoolType(Integer.parseInt(stId));
+					if (years.size() > 0) {
+						// type is checked with no year checked
+						errMsg = st.getName();
+						throw new ResourceException(KEY_ERR_MSG_YEAR_MISSING_FOR_TYPE,
+																	" must have at least one schoolyear checked");
+					}
+				}
+				schoolTypeMap.put(stId, schoolYearMap);
+			} else {
+				String[] schoolYearIds = iwc.getParameterValues(PARAM_RSC_SCHOOLYEARS + stId);
+				if (schoolYearIds != null && schoolYearIds.length > 0) {
+					// year is checked and type is not
+					errMsg = st.getName();
+					throw new ResourceException(KEY_ERR_MSG_TYPE_MISSING_FOR_YEAR,
+																						" must be checked to attach years");
+				}				 
+			}
+		}
+		if (numberOfCheckedTypes == 0) {
+			errMsg = "";
+			throw new ResourceException(KEY_ERR_MSG_AT_LEAST_ONE_TYPE,
+																						"At least one type must be chosen");
+		}
+		return schoolTypeMap;
+	}
+
 	/*
 	 * Extracts the school type ids from the specified map
 	 */
@@ -529,29 +619,49 @@ public class ResourceEditor extends AccountingBlock {
 		return n;
 	}
 
-	private void saveResource(IWContext iwc) throws RemoteException {
+	private String saveResource(IWContext iwc) throws RemoteException {
 		boolean isSavingExistingRsc = !("-1".equals(iwc.getParameter(PARAM_RSC_SAVE)));
+		String tmpErrMsg = null;
 
-		// Get Resource BMP bean fields
-		String rscIdStr = iwc.getParameter(PARAM_RSC_SAVE);
-		// PARAM_RSC_SAVE contains the current resource id or -1 if new rsc
-		int rscId = Integer.parseInt(rscIdStr);
-		String rscName = iwc.getParameter(PARAM_RSC_NAME);
+		try {
+			// Get Resource BMP bean fields
+			String rscIdStr = iwc.getParameter(PARAM_RSC_SAVE);
+			// PARAM_RSC_SAVE contains the current resource id or -1 if new rsc
+			
+			Map typeYearMap = getSchoolTypeParamMap(iwc);
+			
+			int rscId = Integer.parseInt(rscIdStr);
+			String rscName = iwc.getParameter(PARAM_RSC_NAME);
+			if (rscName.equals("")) {
+				errMsg = "";
+				throw new ResourceException(KEY_ERR_MSG_NAME_MISSING, "Name of resource is missing");
+			}
+	
+			getSchoolTypeParamMapErrMsg(iwc); // throws ResourceException
+	
+			int[] typeInts = getSchoolTypeIds(typeYearMap);
+			int[] yearInts = getSchoolYearIds(typeYearMap);
+	
+			// Get ResourcePermission BMP bean fields
+			String assignGrpIdStr = iwc.getParameter(PARAM_RSC_ASSIGN);
+			String viewGrpIdStr = iwc.getParameter(PARAM_RSC_VIEW);
+			int assignGrpId = Integer.parseInt(assignGrpIdStr);
+			int viewGrpId = Integer.parseInt(viewGrpIdStr);
+			boolean permitAssign = (assignGrpId == provider_group_id);
+			boolean permitView = (viewGrpId == provider_group_id);
+			// Save the resource
+			busyBean.saveResource(isSavingExistingRsc, rscName, typeInts, yearInts, permitAssign,
+												permitView, provider_group_id, rscId);
+		} catch (ResourceException e) {
+			// Thrown from getSchoolTypeParamMap(iwc)
+			if (errMsg == null) {
+				// Error msg is concatenated and must not be null when concatenated
+				errMsg = "";
+			}
 
-		Map typeYearMap = getSchoolTypeParamMap(iwc);
-		int[] typeInts = getSchoolTypeIds(typeYearMap);
-		int[] yearInts = getSchoolYearIds(typeYearMap);
-
-		// Get ResourcePermission BMP bean fields
-		String assignGrpIdStr = iwc.getParameter(PARAM_RSC_ASSIGN);
-		String viewGrpIdStr = iwc.getParameter(PARAM_RSC_VIEW);
-		int assignGrpId = Integer.parseInt(assignGrpIdStr);
-		int viewGrpId = Integer.parseInt(viewGrpIdStr);
-		boolean permitAssign = (assignGrpId == provider_group_id);
-		boolean permitView = (viewGrpId == provider_group_id);
-		// Save the resource
-		busyBean.saveResource(isSavingExistingRsc, rscName, typeInts, yearInts, permitAssign,
-																							permitView, provider_group_id, rscId);
+			tmpErrMsg = localize(e.getKey(), e.getDefTrans());
+		}																			
+		return tmpErrMsg;
 	}
 
 	public void deleteResource(IWContext iwc) throws RemoteException {

@@ -524,20 +524,14 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
         if (!startDateStr.equals("")) {
           start= new IWTimestamp(startDateStr);
           start.setAsDate();
-          if (start.isEarlierThan(today)) {
-            throw new DateException("cacc.rsc_placement.to_early_start_date", "Startdate can't be earlier than today");
-          } else {
-            startDate = start.getDate();
-          }
+					startDate = start.getDate();
         } else {
           throw new DateException("cacc.rsc_placement.must_enter_start_date", "You must chose a startdate");                
         }
         if (!endDateStr.equals("")) {
           IWTimestamp end = new IWTimestamp(endDateStr);
           end.setAsDate();
-          if (end.isEarlierThan(today)) {
-            throw new DateException("cacc.rsc_placement.to_early_end_date", "Enddate can't be earlier than today");
-          } else if (end.isEarlierThan(start)){
+					if (end.isEarlierThan(start)){
             throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
           } else {
             endDate = end.getDate();

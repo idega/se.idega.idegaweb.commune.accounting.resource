@@ -30,7 +30,6 @@ import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermissionHome
 import com.idega.block.school.business.SchoolBusiness;
 import com.idega.block.school.data.SchoolCategory;
 import com.idega.block.school.data.SchoolCategoryHome;
-import com.idega.block.school.data.SchoolClass;
 import com.idega.block.school.data.SchoolClassMember;
 import com.idega.block.school.data.SchoolClassMemberHome;
 import com.idega.block.school.data.SchoolType;
@@ -164,15 +163,18 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     Collection possibleRscs = getAssignRightResourcesForGroup(grpID);
     Collection  validRscs = new Vector();
     SchoolClassMember mbr; 
-    SchoolClass schClass;
-    int clsYearID;
-    int clsTypeID;
+    //SchoolClass schClass;
+    int clsYearID = -1;
+    int clsTypeID = -1;
 
     try {
       mbr = getSchoolClassMember(clsMemberID);
-      schClass = mbr.getSchoolClass();
-      clsYearID = mbr.getSchoolYearId();
-      clsTypeID = schClass.getSchoolTypeId();
+
+      //schClass = mbr.getSchoolClass();
+      if (mbr != null) {
+		clsYearID = mbr.getSchoolYearId();
+		clsTypeID = mbr.getSchoolTypeId();      	
+      }
       
       // Loop resources and check if the year and type match the SchoolClassMember(placement)      
       for (Iterator iter = possibleRscs.iterator(); iter.hasNext();) {

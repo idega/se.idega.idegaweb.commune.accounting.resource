@@ -5,7 +5,9 @@ public interface ResourceClassMember extends com.idega.data.IDOEntity
 {
  public java.sql.Date getEndDate();
  public int getMemberFK();
+ public se.idega.idegaweb.commune.accounting.resource.data.Resource getResource();
  public int getResourceFK();
+ public com.idega.block.school.data.SchoolClassMember getSchoolClassMember();
  public java.sql.Date getStartDate();
  public void initializeAttributes();
  public void setEndDate(java.util.Date p0);

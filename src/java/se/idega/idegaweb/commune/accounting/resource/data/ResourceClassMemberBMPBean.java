@@ -62,6 +62,14 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
     q.appendWhereEquals(MEMBER, memberId);
     return super.idoFindPKsByQuery(q);    
   }
+  
+  public Resource getResource() {
+	  return (Resource) getColumnValue(RESOURCE);
+  }
+
+  public SchoolClassMember getSchoolClassMember() {
+	  return (SchoolClassMember) getColumnValue(MEMBER);
+  } 
     
   public void setResourceFK(int rscId) {
     this.setColumn(RESOURCE, rscId);

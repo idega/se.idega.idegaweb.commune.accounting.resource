@@ -48,6 +48,7 @@ import com.idega.presentation.IWContext;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
+import com.idega.util.text.Name;
 
 
 /**
@@ -856,8 +857,10 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
   		String userName = null;
   		try {
 			registrator = getUserBusiness().getUser(registratorID);
-			if (registrator != null)
-				userName = registrator.getNameLastFirst(false);
+			if (registrator != null) {
+				Name name = new Name(registrator.getFirstName(), registrator.getMiddleName(), registrator.getLastName());
+				userName = name.getName(getIWMainApplication().getSettings().getDefaultLocale());
+			}
 		} catch (Exception e) {}	
 
   		// Add createdDate and registrator

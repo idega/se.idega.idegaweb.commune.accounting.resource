@@ -10,12 +10,11 @@ import java.sql.Date;
 import java.util.Collection;
 
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 
+import com.idega.block.school.data.SchoolClassMember;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOException;
 import com.idega.data.IDOQuery;
-import com.idega.block.school.data.SchoolClassMember;
 
 /**
  * @author wmgobom

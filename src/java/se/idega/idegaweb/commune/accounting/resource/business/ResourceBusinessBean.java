@@ -33,13 +33,15 @@ import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 
 /**
- * @author wmgobom
+ * @author Göran Borgman
  *
- * To change the template for this generated type comment go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+ * This Businessbean contains methods for Resourcehandling(resource in the School sense of the word).
  */
 public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBusiness {
   
+  /**
+   * Returns a Collection with all instances of the class SchoolType from the DB.
+   */
   public Collection findAllSchoolTypes() {
     try {
       SchoolTypeHome shome = (SchoolTypeHome) IDOLookup.getHome(SchoolType.class);
@@ -51,7 +53,10 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     }
   }
   
-  public Collection findAllSchoolYears() {
+  /**
+   * Returns a Collection with all instances of the class SchoolYear from the DB.
+   */
+   public Collection findAllSchoolYears() {
       try {
         SchoolYearHome shome = (SchoolYearHome) IDOLookup.getHome(SchoolYear.class);
         return shome.findAllSchoolYears();
@@ -62,6 +67,9 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
       }
   }
   
+  /**
+   * Returns a Collection with all instances of the class accounting.Resource from the DB.
+   */  
   public Collection findAllResources() {
     try {
 			ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
@@ -72,6 +80,10 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
 		}
   }
   
+  /**
+   * Returns one instance of the class Resource from the DB, with param pk as primary key. 
+   * @param pk An Integer object with the value of the primary key
+   */  
   public Resource getResourceByPrimaryKey(Integer pk) {
     try {
 			ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
@@ -82,6 +94,10 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
 		}
   }
   
+  /**
+   * Returns one instance of the class Resource from the DB, with the unique name of param name
+   * @param name The name of the requested Resource
+   */
   public Resource getResourceByName(String name) {
     Resource rsc = null;
     try {
@@ -95,6 +111,12 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     return rsc;
   }
   
+  /**
+   * Saves a Resource to DB
+   * @param name the name of the Resource
+   * @param typeInts intArray of related SchoolTypes
+   * @param yearInts intArray of related SchoolYears
+   */
   public void saveResource(String name, int[] typeInts, int[] yearInts) {
     try {
 			ResourceHome rscHome = (ResourceHome) getIDOHome(Resource.class);
@@ -112,6 +134,11 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     }
   }
   
+  /**
+   * Gets a ResourcePermission by ResourceId and GroupId from db.
+   * @param rscId The requested ResourcePermissions related Resourceid. 
+   * @param grpId The requested ResourcePermissions related Groupid.
+   */
   public ResourcePermission getRscPermByRscAndGrpId(Integer rscId, Integer grpId) {
     ResourcePermission rscPerm = null;
     try {
@@ -135,6 +162,13 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     return rscPerm;
   }
   
+  /**
+   * Saves a ResourcPermission to DB
+   * @param rscId The requested ResourcePermissions related Resourceid. 
+   * @param grpId The requested ResourcePermissions related Groupid.
+   * @param canAssign If this group has permission to assign related Resource to a childs Placement
+   * @param canView If this group has permission to view related Resource
+   */
   public void saveResourcePermission(int rscId, int grpId, boolean canAssign, boolean canView) {
     try {
       ResourcePermissionHome rscPermHome = 
@@ -154,6 +188,10 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     }        
   }
   
+  /**
+   * Delete all ResourcPermissions related to Resource with id rscId
+   * @param rscId The requested ResourcePermissions related Resourceid.
+   */
   public void deletePermissionsForResource(Integer rscId) throws RemoteException, FinderException, RemoveException {
     Collection rscColl = null;
 		ResourcePermissionHome rpHome = (ResourcePermissionHome) getIDOHome(ResourcePermission.class);
@@ -164,6 +202,10 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
 		}
   }
   
+  /**
+   * Gets all SchoolType instances from db related to the Resource rsc
+   * @param rsc The Resource
+   */
   public Map getRelatedSchoolTypes(Resource rsc) {
     HashMap typeMap = null; 
     try {
@@ -180,6 +222,10 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     return typeMap;   
   }
 
+  /**
+   * Gets all SchoolYear instances from db related to the Resource rsc
+   * @param rsc The Resource
+   */
   public Map getRelatedSchoolYears(Resource rsc) {
     HashMap yearMap = null; 
     try {
@@ -196,6 +242,10 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
     return yearMap;   
   }
   
+  /**
+   * Removes a Resource and all related rows from db 
+   * @param rscId
+   */
   public void removeResource(Integer rscId){
     Resource theRsc = getResourceByPrimaryKey(rscId);
     // Get transaction

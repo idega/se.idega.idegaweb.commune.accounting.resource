@@ -354,8 +354,7 @@ public class ResourceEditor extends AccountingBlock {
 		return app;
 	}
 
-	private void initBeans(IWContext iwc) throws java.rmi.RemoteException, 
-																											javax.ejb.CreateException {
+	private void initBeans(IWContext iwc) throws java.rmi.RemoteException {
 		busyBean = (ResourceBusiness) IBOLookup.getServiceInstance(iwc, ResourceBusiness.class);
 	}
 

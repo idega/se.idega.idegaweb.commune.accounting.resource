@@ -14,6 +14,7 @@ import javax.ejb.FinderException;
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolClass;
 import com.idega.block.school.data.SchoolClassMember;
+import com.idega.core.location.data.Address;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOCompositePrimaryKeyException;
 import com.idega.data.IDOEntityDefinition;
@@ -21,6 +22,7 @@ import com.idega.data.IDOException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
+import com.idega.user.data.User;
 
 /**
  * @author wmgobom
@@ -91,6 +93,49 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	}
 	q.appendRightParenthesis();
 	q.appendAndEquals("cm.ic_user_id", userId);
+	return super.idoGetNumberOfRecords(q);    
+  }
+  
+  public int ejbHomeCountBySchoolTypeSeasonAndCommune(int schoolTypeId, int seasonId, int communeId) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
+	IDOEntityDefinition cmDef = IDOLookup.getEntityDefinitionForClass(SchoolClassMember.class);
+	String cmTableName = cmDef.getSQLTableName();
+	String cmIdName = cmDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+
+	IDOEntityDefinition scDef = IDOLookup.getEntityDefinitionForClass(SchoolClass.class);
+	String scTableName = scDef.getSQLTableName();
+	String scIdName = scDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+	
+	IDOEntityDefinition uDef = IDOLookup.getEntityDefinitionForClass(User.class);
+	String uTableName = uDef.getSQLTableName();
+	String uIdName = uDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+
+	IDOEntityDefinition aDef = IDOLookup.getEntityDefinitionForClass(Address.class);
+	String aTableName = aDef.getSQLTableName();
+	String aIdName = aDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+	
+	String uaTableName = "ic_user_address";
+	
+	Date today = new Date(System.currentTimeMillis());
+	IDOQuery q = idoQuery();
+	q.append("select count(distinct u." + uIdName + ") from " + getEntityName() + " rp, ")
+	.append(cmTableName + " cm, ")
+	.append(scTableName + " sc, ")
+	.append(uTableName + " u, ")
+	.append(aTableName + " a, ")
+	.append(uaTableName + " ua")
+	.appendWhereEquals("rp." + MEMBER, "cm." + cmIdName)
+	.appendAnd().append("cm.register_date").appendLessThanOrEqualsSign().appendWithinSingleQuotes(today) 
+	.appendAnd().appendLeftParenthesis().append("cm.removed_date is null")
+	.appendOr().append("cm.removed_date").appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis() 
+	.appendAndEquals("cm." + scIdName, "sc." + scIdName)
+	.appendAndEquals("sc.sch_school_season_id", seasonId)
+	.appendAndEquals("cm.sch_school_type_id", schoolTypeId)
+	.appendAndEquals("cm.ic_user_id", "u." + uIdName)
+	.appendAndEquals("u." + uIdName, "ua.ic_user_id")
+	.appendAndEquals("au.ic_address_id", "a." + aIdName)
+	.appendAndEquals("a.ic_commune_id", communeId)
+	.appendAnd().appendLeftParenthesis().append("rp." + ENDDATE + " is null")
+	.appendOr().append("rp." + ENDDATE).appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis();
 	return super.idoGetNumberOfRecords(q);    
   }
   

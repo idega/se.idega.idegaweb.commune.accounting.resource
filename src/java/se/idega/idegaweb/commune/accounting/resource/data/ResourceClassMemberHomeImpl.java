@@ -60,6 +60,13 @@ public int countByRscIdsAndUserId(int[] p0,int p1)throws com.idega.data.IDOExcep
 	return theReturn;
 }
 
+public int countBySchoolTypeSeasonAndCommune(int p0,int p1,int p2)throws com.idega.data.IDOException,com.idega.data.IDOLookupException,com.idega.data.IDOCompositePrimaryKeyException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeCountBySchoolTypeSeasonAndCommune(p0,p1,p2);
+	this.idoCheckInPooledEntity(entity);
+	return theReturn;
+}
+
 public int getCountOfResources(int p0,java.lang.String p1)throws com.idega.data.IDOException{
 	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
 	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeGetCountOfResources(p0,p1);

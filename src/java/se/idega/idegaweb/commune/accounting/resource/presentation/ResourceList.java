@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceList.java,v 1.1 2004/03/23 10:40:12 anders Exp $
+ * $Id: ResourceList.java,v 1.2 2004/03/30 08:58:05 anders Exp $
  *
  * Copyright (C) 2004 Agura IT. All Rights Reserved.
  *
@@ -23,10 +23,10 @@ import com.idega.presentation.ui.SubmitButton;
 /** 
  * This idegaWeb block generates Excel files listing placements and resources.
  * <p>
- * Last modified: $Date: 2004/03/23 10:40:12 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/30 08:58:05 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ResourceList extends AccountingBlock {
 
@@ -108,10 +108,12 @@ public class ResourceList extends AccountingBlock {
 			ICFile file = xlsWriter.createFile(iwc, ResourceWriter.TYPE_MANAGEMENT_TYPE_RESOURCE_LIST);
 			Link iconLink = new Link(getBundle().getImage("shared/xls.gif"));
 			iconLink.setFile(file);
+			iconLink.setTarget("new");
 			table.add(iconLink, 1, 1);
 			String title = localize(KEY_RESOURCE_PLACEMENT_LIST, "Resource placement list");
 			Link link = new Link(title);
 			link.setFile(file);
+			link.setTarget("new");
 			table.add(link, 2, 1);
 			Form form = new Form();
 			SubmitButton back = new SubmitButton("", localize(KEY_BACK, KEY_BACK));

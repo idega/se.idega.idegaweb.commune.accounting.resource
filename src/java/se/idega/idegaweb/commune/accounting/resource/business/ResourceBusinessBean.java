@@ -687,6 +687,27 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 	return rscColl;
   }
   
+  /**
+   * Get a String with the Resource names related to param placement
+   * @param placement
+   * @return
+   */	
+  public String getResourcesString(SchoolClassMember placement) {
+	  Collection coll = getResourcePlacementsByMbrIdOrderByRscName((Integer) placement.getPrimaryKey());
+	  StringBuffer buf = new StringBuffer("");
+	  int i = 1;
+	  for (Iterator iter = coll.iterator(); iter.hasNext();) {
+			ResourceClassMember rscPl = (ResourceClassMember) iter.next();
+			buf.append(rscPl.getResource().getResourceName());
+			if (i < coll.size())
+				buf.append(", ");			
+			i++;					
+	  }
+				
+	  return buf.toString();
+  }
+
+  
   public SchoolCategoryHome getSchoolCategoryHome() {
   	SchoolCategoryHome home = null;
   	try {

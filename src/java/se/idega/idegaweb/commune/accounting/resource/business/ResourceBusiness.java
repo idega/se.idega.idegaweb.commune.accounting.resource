@@ -25,6 +25,7 @@ public interface ResourceBusiness extends com.idega.business.IBOService
  public se.idega.idegaweb.commune.accounting.resource.data.Resource getResourceByPrimaryKey(java.lang.Integer p0) throws java.rmi.RemoteException;
  public java.util.Collection getResourcePlacementsByMbrIdOrderByRscName(java.lang.Integer p0) throws java.rmi.RemoteException;
  public java.util.Collection getResourcePlacementsByMemberId(java.lang.Integer p0) throws java.rmi.RemoteException;
+ public java.lang.String getResourcesString(com.idega.block.school.data.SchoolClassMember p0) throws java.rmi.RemoteException;
  public se.idega.idegaweb.commune.accounting.resource.data.ResourcePermission getRscPermByRscAndGrpId(java.lang.Integer p0,java.lang.Integer p1) throws java.rmi.RemoteException;
  public com.idega.block.school.business.SchoolBusiness getSchoolBusiness(com.idega.presentation.IWContext p0)throws java.rmi.RemoteException, java.rmi.RemoteException;
  public com.idega.block.school.data.SchoolCategoryHome getSchoolCategoryHome() throws java.rmi.RemoteException;

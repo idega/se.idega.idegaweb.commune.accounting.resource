@@ -417,16 +417,45 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
       permBmp.setGroupFK(grpId);
       permBmp.store();      
   }
+  
+  /**
+   * Creates and store a new ResourcePlacement to DB. No indata checks.
+   * @param rscId The ResourceID. 
+   * @param grpId The SchoolPlacements SchoolClassMemberID.
+   * @param startDate Startdate of this ResourcePlacement
+   * @param endDate Enddate of this ResourcePlacement
+   */
+	public void createResourcePlacement(int rscId, int memberId, String startDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+		ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+		Date startDate = null;
+		if (!startDateStr.equals("")) {
+			IWTimestamp start= new IWTimestamp(startDateStr);
+			startDate = start.getDate();
+		}
+	
+		try {         
+			ResourceClassMember rscMemberBmp = rscClMbrHome.create();
+			rscMemberBmp.setResourceFK(rscId);
+			rscMemberBmp.setMemberFK(memberId);
+			rscMemberBmp.setStartDate(startDate);
+			rscMemberBmp.store();
+		}
+		catch (javax.ejb.CreateException ce) {
+			throw new java.rmi.RemoteException(ce.getMessage());
+		}            
+	}   
+
 
   /**
-   * Saves a ResourcePlacement to DB
+   * Saves a ResourcePlacement to DB. Has indata checks and throws indata exceptions. Used primarily
+   * by SchoolAdminOverview.
    * @param rscId The ResourceID. 
    * @param grpId The SchoolPlacements SchoolClassMemberID.
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
    */
   public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
-      ResourceClassMemberHome rscPermHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+      ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
       try {
         IWTimestamp today = IWTimestamp.RightNow();
         today.setAsDate();    
@@ -470,7 +499,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
         }
          
         // Store       
-        ResourceClassMember rscMemberBmp = rscPermHome.create();
+        ResourceClassMember rscMemberBmp = rscClMbrHome.create();
         rscMemberBmp.setResourceFK(rscId);
         rscMemberBmp.setMemberFK(memberId);
         rscMemberBmp.setStartDate(startDate);

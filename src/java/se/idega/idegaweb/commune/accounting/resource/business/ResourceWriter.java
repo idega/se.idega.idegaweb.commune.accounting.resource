@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.6 2004/03/17 07:57:13 anders Exp $
+ * $Id: ResourceWriter.java,v 1.7 2004/03/18 12:26:39 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -26,6 +26,10 @@ import se.idega.idegaweb.commune.accounting.presentation.AccountingBlock;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMember;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceClassMemberHome;
 import se.idega.idegaweb.commune.business.CommuneUserBusiness;
+import se.idega.idegaweb.commune.school.data.CurrentSchoolSeason;
+import se.idega.idegaweb.commune.school.data.CurrentSchoolSeasonHome;
+import se.idega.idegaweb.commune.school.data.SchoolChoice;
+import se.idega.idegaweb.commune.school.data.SchoolChoiceHome;
 
 import com.idega.block.school.business.SchoolBusiness;
 import com.idega.block.school.data.School;
@@ -59,10 +63,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/17 07:57:13 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/18 12:26:39 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ResourceWriter {
 
@@ -84,7 +88,7 @@ public class ResourceWriter {
 	/**
 	 * Creates a resource export file.
 	 */
-	public ICFile createFile(IWContext iwc) {
+	public ICFile createFile(IWContext iwc, boolean isSchoolChoice) {
 		ICFile reportFolder = null;
 		ICFileHome fileHome = null;
 
@@ -111,7 +115,12 @@ public class ResourceWriter {
 		ICFile exportFile = null;
 				
 		try {
-			MemoryFileBuffer buffer = getNativeLanguageBuffer(iwc);
+			MemoryFileBuffer buffer = null;
+			if (isSchoolChoice) {
+				buffer = getNativeLanguageSchoolChoiceBuffer(iwc);
+			} else {
+				buffer = getNativeLanguageBuffer(iwc);
+			}
 			MemoryInputStream mis = new MemoryInputStream(buffer);
 			try {
 				exportFile = fileHome.findByFileName(_filename);
@@ -135,7 +144,10 @@ public class ResourceWriter {
 		return exportFile;
 	}
 
-	public MemoryFileBuffer getNativeLanguageBuffer(IWContext iwc) {
+	/*
+	 * Returns XLS buffer with native language list. 
+	 */
+	private MemoryFileBuffer getNativeLanguageBuffer(IWContext iwc) {
 		MemoryFileBuffer buffer = null;
 		try {
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
@@ -201,7 +213,7 @@ public class ResourceWriter {
 			cell.setCellValue(iwrb.getLocalizedString("resource.custodian_email", "Custodian's e-mail"));
 			cell.setCellStyle(style);
 			cell = row.createCell((short)cellColumn++);
-			cell.setCellValue(iwrb.getLocalizedString("resource.school", "Skola"));
+			cell.setCellValue(iwrb.getLocalizedString("resource.school", "School"));
 			cell.setCellStyle(style);
 			cell = row.createCell((short)cellColumn++);
 			cell.setCellValue(iwrb.getLocalizedString("resource.school_year", "School Year"));
@@ -292,6 +304,214 @@ public class ResourceWriter {
 				int userId = ((Integer) student.getPrimaryKey()).intValue(); 
 				int nrOfYears = rcmHome.countByRscIdsAndUserId(resourceIds, userId);
 				row.createCell((short)cellColumn++).setCellValue(nrOfYears);
+			}
+			
+			wb.write(mos);
+			buffer.setMimeType("application/vnd.ms-excel");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return buffer;
+	}
+
+	/*
+	 * Returns XLS buffer with native language school choice list. 
+	 */
+	private MemoryFileBuffer getNativeLanguageSchoolChoiceBuffer(IWContext iwc) {
+		MemoryFileBuffer buffer = null;
+		try {
+			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
+
+			SchoolBusiness sb = getSchoolBusiness(iwc);
+			SchoolSeason currentSeason = sb.getCurrentSchoolSeason();
+			CurrentSchoolSeasonHome seasonHome = (CurrentSchoolSeasonHome) IDOLookup.getHome(CurrentSchoolSeason.class);
+			CurrentSchoolSeason season = seasonHome.findCurrentSeason();
+			int currentSchoolChoiceSeasonId = ((Integer) season.getCurrent()).intValue();
+			
+			CommuneHome communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);
+			Commune homeCommune = communeHome.findDefaultCommune();
+			int homeCommuneId = ((Integer) homeCommune.getPrimaryKey()).intValue();
+			
+			SchoolChoiceHome scHome = (SchoolChoiceHome) IDOLookup.getHome(SchoolChoice.class);
+			Collection schoolChoices = scHome.findAllPlacedBySeason(currentSchoolChoiceSeasonId);
+			
+			buffer = new MemoryFileBuffer();
+			MemoryOutputStream mos = new MemoryOutputStream(buffer);
+			
+			HSSFWorkbook wb = new HSSFWorkbook();
+			HSSFSheet sheet = wb.createSheet(_filename);
+			int cellColumn = 0;
+
+			sheet.setColumnWidth((short)cellColumn++, (short) (16 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (30 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (24 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (24 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (16 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (28 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (24 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (14 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (14 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (24 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (14 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (14 * 256));
+			sheet.setColumnWidth((short)cellColumn++, (short) (24 * 256));
+			HSSFFont font = wb.createFont();
+			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+			font.setFontHeightInPoints((short)12);
+			HSSFCellStyle style = wb.createCellStyle();
+			style.setFont(font);
+	
+			cellColumn = 0;
+			int cellRow = 0;			
+			
+			HSSFRow row = sheet.createRow((short)cellRow++);			
+			HSSFCell cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.personal_id", "Personal ID"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.name", "Name"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.street_address", "Street Address"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.postal_address", "Postal Address"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.phone", "Phone"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.custodian_email", "Custodian's e-mail"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.school_current_season", "School current season"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.school_year", "School Year"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.school_class", "School Class"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.school_next_season", "School next season"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.school_year", "School Year"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.school_class", "School Class"));
+			cell.setCellStyle(style);
+			cell = row.createCell((short)cellColumn++);
+			cell.setCellValue(iwrb.getLocalizedString("resource.native_language", "Native Language"));
+			cell.setCellStyle(style);
+	
+			Iterator iter = schoolChoices.iterator();
+			while (iter.hasNext()) {
+				cellColumn = 0;
+				
+				SchoolChoice schoolChoice = (SchoolChoice) iter.next();
+				User student = schoolChoice.getChild();
+				if (student == null) {
+					continue;
+				}
+				ICLanguage nativeLanguage = student.getNativeLanguage();
+				if (nativeLanguage == null) {
+					// List only school choices with native language
+					continue;
+				}
+				int studentId = ((Integer) student.getPrimaryKey()).intValue();
+
+				String studentName = student.getLastName() + " " + student.getFirstName();
+				Address address = getCommuneUserBusiness(iwc).getUsersMainAddress(student);
+				PostalCode postalCode = null;
+				int communeId = -1;
+				if (address != null) {
+					postalCode = address.getPostalCode();
+					communeId = address.getCommuneID();
+				}
+				if (communeId != homeCommuneId) {
+					continue;
+				}
+				
+				String currentSchoolYearName = "";
+				String currentSchoolClassName = "";
+				String currentSchoolName = "";
+				try {
+					SchoolClassMember currentPlacement = getSchoolBusiness(iwc).findByStudentAndSeason(student, currentSeason);
+					SchoolYear currentSchoolYear = currentPlacement.getSchoolYear();
+					currentSchoolYearName = currentSchoolYear.getName();
+					SchoolClass currentSchoolClass = currentPlacement.getSchoolClass();
+					currentSchoolClassName = currentSchoolClass.getName();
+					School currentSchool = currentSchoolClass.getSchool();
+					currentSchoolName = currentSchool.getName();
+				} catch (Exception e) {
+					// No current placement, list blank cells
+				}
+
+				String nextSchoolYearName = "";
+				String nextSchoolClassName = "";
+				String nextSchoolName = "";
+				try {
+					SchoolClassMember nextPlacement = getSchoolBusiness(iwc).findByStudentAndSeason(studentId, currentSchoolChoiceSeasonId);
+					SchoolYear nextSchoolYear = nextPlacement.getSchoolYear();
+					nextSchoolYearName = nextSchoolYear.getName();
+					SchoolClass nextSchoolClass = nextPlacement.getSchoolClass();
+					nextSchoolClassName = nextSchoolClass.getName();
+					School nextSchool = nextSchoolClass.getSchool();
+					nextSchoolName = nextSchool.getName();
+				} catch (Exception e) {
+					// No next placement, list blank cells					
+				}
+
+				Phone phone = getCommuneUserBusiness(iwc).getChildHomePhone(student);
+				User custodian = getCommuneUserBusiness(iwc).getCustodianForChild(student);
+	
+				row = sheet.createRow((short)cellRow++);
+				
+				row.createCell((short)cellColumn++).setCellValue(PersonalIDFormatter.format(student.getPersonalID(), iwc.getCurrentLocale()));
+				row.createCell((short)cellColumn++).setCellValue(studentName);
+	
+				if (address != null) {
+					row.createCell((short)cellColumn++).setCellValue(address.getStreetAddress());
+					if (postalCode != null) {
+						row.createCell((short)cellColumn++).setCellValue(postalCode.getPostalAddress());
+					} else {
+						cellColumn++;
+					}
+				} else {
+					cellColumn += 2;
+				}
+
+				if (phone != null) {
+					row.createCell((short)cellColumn++).setCellValue(phone.getNumber());
+				} else {
+					cellColumn++;
+				}
+				
+				if (custodian != null) {
+					Email email = getCommuneUserBusiness(iwc).getEmail(custodian);
+					if (email != null) {
+						row.createCell((short)cellColumn++).setCellValue(email.getEmailAddress());						
+					} else {
+						cellColumn++;
+					}
+				} else {
+					cellColumn++;
+				}
+
+				row.createCell((short)cellColumn++).setCellValue(currentSchoolName);
+				
+				row.createCell((short)cellColumn++).setCellValue(currentSchoolYearName);
+
+				row.createCell((short)cellColumn++).setCellValue(currentSchoolClassName);
+
+				row.createCell((short)cellColumn++).setCellValue(nextSchoolName);
+				
+				row.createCell((short)cellColumn++).setCellValue(nextSchoolYearName);
+
+				row.createCell((short)cellColumn++).setCellValue(nextSchoolClassName);
+
+				row.createCell((short)cellColumn++).setCellValue(nativeLanguage.getName());
 			}
 			
 			wb.write(mos);

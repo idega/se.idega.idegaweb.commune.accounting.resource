@@ -158,26 +158,33 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
   
   /**
    * Returns a Collection of Resources related to a placements school year and type, and with 
-   * rights to assign the Resource for the given group id.
+   * rights to assign the Resource for the given group id. If group id == -7 all resources are shown.
+   * This is used when administered by central administration with rights to see all resources
    * 
    * @param grpID The Group id 
    * @param clsMemberID The SchoolClassMember(placement) id
    */
-  public Collection getAssignableResourcesForPlacement(Integer grpID,  Integer clsMemberID) {
-    Collection possibleRscs = getAssignRightResourcesForGroup(grpID);
+  public Collection getAssignableResourcesForPlacement(Integer grpID,  Integer clsMemberID) {  	
+    Collection possibleRscs = null;
     Collection  validRscs = new Vector();
     SchoolClassMember mbr; 
     //SchoolClass schClass;
     int clsYearID = -1;
     int clsTypeID = -1;
+    
+    if (grpID.intValue() == -7)
+    	// grpID is -7, means used by central admin
+    	possibleRscs = findAllResources();
+    else   
+    	getAssignRightResourcesForGroup(grpID);
 
     try {
       mbr = getSchoolClassMember(clsMemberID);
 
       //schClass = mbr.getSchoolClass();
       if (mbr != null) {
-		clsYearID = mbr.getSchoolYearId();
-		clsTypeID = mbr.getSchoolTypeId();      	
+      	clsYearID = mbr.getSchoolYearId();
+      	clsTypeID = mbr.getSchoolTypeId();      	
       }
       
       // Loop resources and check if the year and type match the SchoolClassMember(placement)      

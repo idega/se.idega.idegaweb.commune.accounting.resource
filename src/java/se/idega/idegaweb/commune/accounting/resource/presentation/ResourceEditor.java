@@ -420,8 +420,7 @@ public class ResourceEditor extends AccountingBlock {
     return ints;
   }
   
-  public void main(IWContext iwc) throws Exception {
-    this.setResourceBundle(this.getResourceBundle(iwc));
+  public void init(IWContext iwc) throws Exception {
     //iwb = getBundle(iwc);
     iwrb = getResourceBundle(iwc);
     tFormat = TextFormat.getInstance();

@@ -96,7 +96,7 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	return super.idoGetNumberOfRecords(q);    
   }
   
-  public int ejbHomeCountByRscSchoolTypeSeasonManagementTypeAndCommune(int resourceId, int schoolTypeId, int seasonId, String managementTypeId, int communeId) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
+  public int ejbHomeCountByRscSchoolTypeSeasonManagementTypeAndCommune(int resourceId, int schoolTypeId, int seasonId, String managementTypeId, int communeId, boolean outsideCommune) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
 	IDOEntityDefinition cmDef = IDOLookup.getEntityDefinitionForClass(SchoolClassMember.class);
 	String cmTableName = cmDef.getSQLTableName();
 	String cmIdName = cmDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
@@ -138,9 +138,13 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	.appendAndEquals("cm.sch_school_type_id", schoolTypeId)
 	.appendAndEquals("cm.ic_user_id", "u." + uIdName)
 	.appendAndEquals("u." + uIdName, "ua.ic_user_id")
-	.appendAndEquals("ua.ic_address_id", "a." + aIdName)
-	.appendAndEquals("a.ic_commune_id", communeId)
-	.appendAnd().appendLeftParenthesis().append("rp." + ENDDATE + " is null")
+	.appendAndEquals("ua.ic_address_id", "a." + aIdName);
+	if (outsideCommune) {
+		q.appendAnd().append("a.ic_commune_id <> ").append(communeId);
+	} else {
+		q.appendAndEquals("a.ic_commune_id", communeId);
+	}
+	q.appendAnd().appendLeftParenthesis().append("rp." + ENDDATE + " is null")
 	.appendOr().append("rp." + ENDDATE).appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis()
 	.appendAndEquals("sc.school_id", "s." + sIdName)
 	.appendAndEqualsQuoted("s.management_type", managementTypeId);

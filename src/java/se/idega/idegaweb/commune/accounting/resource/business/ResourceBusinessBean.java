@@ -327,6 +327,17 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
     return mColl;
   }
   
+  public Collection getResourcePlacementsByMbrIdOrderByRscName(Integer memberId) {
+	Collection mColl = null;
+	try {
+	  ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+	  mColl = mHome.findAllByClsMbrIdOrderByRscName(memberId);
+	} catch (Exception e) {
+	  e.printStackTrace();
+	}
+	return mColl;
+  }  
+  
   public int countResourcePlacementsByRscIDAndMemberID(Integer rID, Integer mID) {
     int pSum = -1;
     try {

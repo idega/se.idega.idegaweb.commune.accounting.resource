@@ -49,6 +49,7 @@ public class ResourceBMPBean extends GenericEntity implements Resource {
   
   public Collection ejbFindAllResources() throws FinderException {
     IDOQuery query = idoQueryGetSelect();
+    query.appendOrderBy(NAME);
     return super.idoFindPKsByQuery(query);        
   }
   
@@ -64,7 +65,8 @@ public class ResourceBMPBean extends GenericEntity implements Resource {
     q.append("select r.* from cacc_resource r, cacc_resource_permission rp ");
     q.appendWhereEquals("r.cacc_resource_id", "rp.cacc_resource_id");
     q.appendAndEquals("rp.ic_group_id", grpId);
-    q.appendAndEqualsQuoted("rp.permit_view_resource", "Y");   
+    q.appendAndEqualsQuoted("rp.permit_view_resource", "Y");
+    q.appendOrderBy("r." + NAME); 
     
     return idoFindPKsByQuery(q);
   }
@@ -74,7 +76,8 @@ public class ResourceBMPBean extends GenericEntity implements Resource {
     q.append("select r.* from cacc_resource r, cacc_resource_permission rp ");
     q.appendWhereEquals("r.cacc_resource_id", "rp.cacc_resource_id");
     q.appendAndEquals("rp.ic_group_id", grpId);
-    q.appendAndEqualsQuoted("rp.permit_assign_resource", "Y");  
+    q.appendAndEqualsQuoted("rp.permit_assign_resource", "Y");
+	q.appendOrderBy("r." + NAME);  
     
     return idoFindPKsByQuery(q);
   }

@@ -62,6 +62,18 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
     q.appendWhereEquals(MEMBER, memberId);
     return super.idoFindPKsByQuery(q);    
   }
+
+  public Collection ejbFindAllByClsMbrIdOrderByRscName(Integer memberId) throws FinderException {
+	IDOQuery q = idoQuery();
+	q.append("select rp.* from " + getEntityName() + " rp, ")
+	.append(ResourceBMPBean.TABLE_NAME + " r")
+	.appendWhereEquals("rp." + MEMBER, memberId)
+	.appendAndEquals("rp." + RESOURCE, "r.cacc_resource_id")
+	.appendOrderBy("r." + ResourceBMPBean.NAME);
+
+	System.out.println("*** SQL "  + q.toString());	
+	return super.idoFindPKsByQuery(q);    
+  }  
   
   public Resource getResource() {
 	  return (Resource) getColumnValue(RESOURCE);

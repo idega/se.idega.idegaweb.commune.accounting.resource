@@ -20,6 +20,13 @@ public java.util.Collection findAllByClassMemberId(java.lang.Integer p0)throws j
 	return this.getEntityCollectionForPrimaryKeys(ids);
 }
 
+public java.util.Collection findAllByClsMbrIdOrderByRscName(java.lang.Integer p0)throws javax.ejb.FinderException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	java.util.Collection ids = ((ResourceClassMemberBMPBean)entity).ejbFindAllByClsMbrIdOrderByRscName(p0);
+	this.idoCheckInPooledEntity(entity);
+	return this.getEntityCollectionForPrimaryKeys(ids);
+}
+
 public java.util.Collection findAllByRscIdAndMemberId(java.lang.Integer p0,java.lang.Integer p1)throws javax.ejb.FinderException{
 	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
 	java.util.Collection ids = ((ResourceClassMemberBMPBean)entity).ejbFindAllByRscIdAndMemberId(p0,p1);

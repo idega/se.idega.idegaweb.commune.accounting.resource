@@ -31,5 +31,5 @@ public interface ResourceBusiness extends com.idega.business.IBOService
  public com.idega.block.school.data.SchoolClassMember getSchoolClassMember(java.lang.Integer p0) throws java.rmi.RemoteException;
  public java.util.Collection getViewRightResourcesForGroup(java.lang.Integer p0) throws java.rmi.RemoteException;
  public void removeResource(java.lang.Integer p0) throws java.rmi.RemoteException;
- public void saveResource(boolean p0,java.lang.String p1,int[] p2,int[] p3,boolean p4,boolean p5,int p6,int p7) throws java.rmi.RemoteException;
+ public void saveResource(boolean p0,java.lang.String p1,int[] p2,int[] p3,boolean p4,boolean p5,int p6,int p7)throws se.idega.idegaweb.commune.accounting.resource.business.ResourceException, java.rmi.RemoteException;
 }

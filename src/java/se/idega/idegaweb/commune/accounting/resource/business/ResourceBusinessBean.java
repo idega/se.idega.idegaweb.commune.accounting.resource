@@ -50,7 +50,11 @@ import com.idega.util.IWTimestamp;
  *
  * This Businessbean contains methods for Resourcehandling(resource in the School sense of the word).
  */
-public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBusiness {
+public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusiness {
+	
+	private static final String KP = "ResourceBusiness.";
+	private static final String KEY_ERR_MSG_COULD_NOT_SAVE_RSC = 
+																						KP + "err_msg.could_not_save_resource";
   
   /**
    * Returns a Collection with all instances of the Class SchoolType from the DB.
@@ -354,7 +358,8 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
   }
   
   public void saveResource(boolean isSavingExisting, String rscName, int[] typeInts, int[] yearInts, 
-                                          boolean permitAssign, boolean permitView, int grpId, int rscId) {
+                                          boolean permitAssign, boolean permitView, int grpId, int rscId) 
+                                          throws ResourceException {
     UserTransaction trans = getSessionContext().getUserTransaction();
     try {
        trans.begin();          // Start transaction                                        
@@ -386,8 +391,6 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
       }
       trans.commit();       // Commit transaction
     } catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
       try {
         trans.rollback();     // Rollback transaction
       } catch (IllegalStateException e1) {
@@ -397,6 +400,8 @@ public class ResourceBusinessBean extends IBOServiceBean  implements ResourceBus
       } catch (SystemException e1) {
         e1.printStackTrace();
       }
+	  throw new ResourceException(KEY_ERR_MSG_COULD_NOT_SAVE_RSC,
+													"Could not save resource. Check that resource name is unique.");
     }                         
   }
 

@@ -7,6 +7,7 @@
 package se.idega.idegaweb.commune.accounting.resource.business;
 
 import java.rmi.RemoteException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.presentation.IWContext;
 import com.idega.util.IWTimestamp;
+
 
 /**
  * @author Göran Borgman
@@ -512,7 +514,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
    */
-  public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr, boolean doCheckStartDate)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+  public void createResourcePlacement(int rscId, int schClsMbrID, String startDateStr, String endDateStr, boolean doCheckStartDate)  throws RemoteException, DateException, ResourceException, ClassMemberException {
       ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
       try {
         IWTimestamp today = IWTimestamp.RightNow();
@@ -524,10 +526,10 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
         // Check valid resource and placement
         if (rscId == -1) {
           throw new ResourceException("cacc.rsc_placement.no_resource_chosen","You must chose a resource");
-        } else if (memberId == -1){
+        } else if (schClsMbrID == -1){
           throw new ClassMemberException("cacc.rsc_placement.no_member_placement_id", "No group placement found");
         } else {
-          int existing = countResourcePlacementsByRscIDAndMemberID(new Integer(rscId), new Integer(memberId));
+          int existing = countResourcePlacementsByRscIDAndMemberID(new Integer(rscId), new Integer(schClsMbrID));
           if (existing > 0) {
             throw new ResourceException("cacc.rsc_placement.this_resource_already_placed", "This placement already have this resource");
           }
@@ -547,8 +549,21 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
         if (!endDateStr.equals("")) {
           IWTimestamp end = new IWTimestamp(endDateStr);
           end.setAsDate();
-					if (end.isEarlierThan(start)){
+          
+          IWTimestamp removed = null;
+          SchoolClassMember schClsMbr = getSchoolClassMember(new Integer(schClsMbrID));
+          if (schClsMbr != null) {
+          	Timestamp remTS = schClsMbr.getRemovedDate();
+          	removed = new IWTimestamp(remTS.getTime());
+          	if (removed != null) {
+          		removed.setAsDate();
+          	}
+          }
+         
+          if (end.isEarlierThan(start)){
             throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
+          } else if(removed != null && removed.isEarlierThan(end)) {
+          	throw new DateException("cacc.rsc_placement.enddate_later_than_removeddate", "Resource enddate can't be later than school placements enddate");
           } else {
             endDate = end.getDate();
           }
@@ -557,7 +572,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
         // Store       
         ResourceClassMember rscMemberBmp = rscClMbrHome.create();
         rscMemberBmp.setResourceFK(rscId);
-        rscMemberBmp.setMemberFK(memberId);
+        rscMemberBmp.setMemberFK(schClsMbrID);
         rscMemberBmp.setStartDate(startDate);
         if (endDate != null) {
           rscMemberBmp.setEndDate(endDate);
@@ -573,25 +588,38 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * Delete all ResourcPermissions related to Resource with id rscId
    * @param rscId The requested ResourcePermissions related Resourceid.
    */
-  public void finishResourceClassMember(Integer mbrId, String startDateStr, String endDateStr) throws FinderException, RemoteException, DateException, ClassMemberException {
+  public void finishResourceClassMember(Integer schClsMbrID, Integer rscClsMbrId, String startDateStr, String endDateStr) throws FinderException, RemoteException, DateException, ClassMemberException {
     ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
-    ResourceClassMember  mbr = mHome.findByPrimaryKey(mbrId);
+    ResourceClassMember  mbr = mHome.findByPrimaryKey(rscClsMbrId);
     IWTimestamp today = IWTimestamp.RightNow();
     today.setAsDate();
     IWTimestamp start = new IWTimestamp(startDateStr);
     Date endDate;
     
-    if (mbrId == null)
+    if (rscClsMbrId == null)
       throw new ClassMemberException("cacc.rsc_placement.no_member_placement_id", "No group placement found");
 
     // Check dates
     if (!endDateStr.equals("")) {
       IWTimestamp end = new IWTimestamp(endDateStr);
       end.setAsDate();
+
+      IWTimestamp removed = null;
+      SchoolClassMember schClsMbr = getSchoolClassMember(schClsMbrID);
+      if (schClsMbr != null) {
+      	Timestamp remTS = schClsMbr.getRemovedDate();
+      	removed = new IWTimestamp(remTS.getTime());
+      	if (removed != null) {
+      		removed.setAsDate();
+      	}
+      }
+           
       if (end.isEarlierThan(today)) {
         throw new DateException("cacc.rsc_placement.to_early_end_date", "Enddate can't be earlier than today");
       } else if (end.isEarlierThan(start)){
         throw new DateException("cacc.rsc_placement.enddate_earlier_than_startdate", "Enddate can't be earlier than startdate");            
+      } else if(removed != null && removed.isEarlierThan(end)) {
+      	throw new DateException("cacc.rsc_placement.enddate_later_than_removeddate", "Resource enddate can't be later than school placements enddate");
       } else {
         endDate = end.getDate();
         mbr.setEndDate(endDate);

@@ -37,6 +37,7 @@ import com.idega.block.school.data.SchoolType;
 import com.idega.block.school.data.SchoolTypeHome;
 import com.idega.block.school.data.SchoolYear;
 import com.idega.block.school.data.SchoolYearHome;
+import com.idega.business.IBOHome;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOServiceBean;
 import com.idega.data.IDOException;
@@ -45,6 +46,8 @@ import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.presentation.IWContext;
+import com.idega.user.business.UserBusiness;
+import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
 
 
@@ -471,7 +474,19 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * @param startDate Startdate of this ResourcePlacement
    * @param endDate Enddate of this ResourcePlacement
    */
-	public ResourceClassMember createResourcePlacement(int rscId, int memberId, String startDateStr)  throws RemoteException {
+  public ResourceClassMember createResourcePlacement(int rscId, int memberId, String startDateStr)  throws RemoteException {
+  	return createResourcePlacement(rscId, memberId, startDateStr, -1);	
+  }
+  
+  /**
+   * Creates and stores a new ResourcePlacement to DB. No indata checks.
+   * @param rscId The ResourceID. 
+   * @param grpId The SchoolPlacements SchoolClassMemberID.
+   * @param startDate Startdate of this ResourcePlacement
+   * @param endDate Enddate of this ResourcePlacement
+   * @param registratorID UserID of current user
+   */
+	public ResourceClassMember createResourcePlacement(int rscId, int memberId, String startDateStr, int registratorID)  throws RemoteException {
 		ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
 		Date startDate = null;
 		ResourceClassMember rscMemberBmp = null;
@@ -479,12 +494,19 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 			IWTimestamp start= new IWTimestamp(startDateStr);
 			startDate = start.getDate();
 		}
-	
+		
+		// Get created date - rightNow
+		java.util.Date rightNowDate = new java.util.Date();
+		java.sql.Date rightNow = new java.sql.Date(rightNowDate.getTime());
+		
 		try {         
 			rscMemberBmp = rscClMbrHome.create();
 			rscMemberBmp.setResourceFK(rscId);
 			rscMemberBmp.setMemberFK(memberId);
 			rscMemberBmp.setStartDate(startDate);
+			if (registratorID != -1)
+				rscMemberBmp.setRegistratorId(registratorID);
+			rscMemberBmp.setCreatedDate(rightNow);
 			rscMemberBmp.store();
 		}
 		catch (javax.ejb.CreateException ce) {
@@ -502,8 +524,8 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 	 * @param startDate Startdate of this ResourcePlacement
 	 * @param endDate Enddate of this ResourcePlacement
 	 */
-	public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr)  throws RemoteException, DateException, ResourceException, ClassMemberException {
-		createResourcePlacement(rscId, memberId, startDateStr, endDateStr, true);
+	public void createResourcePlacement(int rscId, int memberId, String startDateStr, String endDateStr, int registratorID)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+		createResourcePlacement(rscId, memberId, startDateStr, endDateStr, registratorID, true);
 	}
   /**
    * Saves a ResourcePlacement to DB. Has boolean to set if we want to check past time of start date. 
@@ -515,7 +537,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * @param endDate Enddate of this ResourcePlacement
    * @param isCentralAdmin check validity of start date if user is a provider
    */
-  public void createResourcePlacement(int rscId, int schClsMbrID, String startDateStr, String endDateStr, boolean isCentralAdmin)  throws RemoteException, DateException, ResourceException, ClassMemberException {
+  public void createResourcePlacement(int rscId, int schClsMbrID, String startDateStr, String endDateStr, int registratorID, boolean isCentralAdmin)  throws RemoteException, DateException, ResourceException, ClassMemberException {
       ResourceClassMemberHome rscClMbrHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
       try {
         IWTimestamp today = IWTimestamp.RightNow();
@@ -585,16 +607,22 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
           	}
           	endDate = end.getDate();
          } 
-
-         
+        
+        // Get created date - rightNow
+        java.util.Date rightNowDate = new java.util.Date();
+        java.sql.Date rightNow = new java.sql.Date(rightNowDate.getTime());
+        
         // Store       
         ResourceClassMember rscMemberBmp = rscClMbrHome.create();
         rscMemberBmp.setResourceFK(rscId);
         rscMemberBmp.setMemberFK(schClsMbrID);
         rscMemberBmp.setStartDate(startDate);
-        if (endDate != null) {
-          rscMemberBmp.setEndDate(endDate);
-        }
+        if (endDate != null)
+        	rscMemberBmp.setEndDate(endDate);
+        if (registratorID != -1)
+        	rscMemberBmp.setRegistratorId(registratorID);
+        rscMemberBmp.setCreatedDate(rightNow);
+        
         rscMemberBmp.store();
       }
       catch (javax.ejb.CreateException ce) {
@@ -812,6 +840,43 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 				
 	  return buf.toString();
   }
+  
+  /**
+   * Get a String with the Resource names related to param placement
+   * @param placement
+   * @return
+   */	
+  public String getResourcesStringXtraInfo(SchoolClassMember placement) {
+  	Collection coll = getResourcePlacementsByMbrIdOrderByRscName((Integer) placement.getPrimaryKey());
+  	StringBuffer buf = new StringBuffer("");
+  	int i = 1;
+  	for (Iterator iter = coll.iterator(); iter.hasNext();) {
+  		ResourceClassMember rscPl = (ResourceClassMember) iter.next();
+  		int registratorID = rscPl.getRegistratorId();
+  		User registrator = null;
+  		String userName = null;
+  		try {
+			registrator = getUserBusiness().getUser(registratorID);
+			if (registrator != null)
+				userName = registrator.getNameLastFirst(false);
+		} catch (Exception e) {}	
+
+  		// Add createdDate and registrator
+		buf.append(rscPl.getResource().getResourceName());
+  		java.sql.Date createdDate = rscPl.getCreatedDate();
+  		if (createdDate != null) {
+  			buf.append("(" + createdDate.toString());
+  			if (userName != null)
+  				buf.append("/" + userName);
+  			buf.append(")");
+  		}
+  		if (i < coll.size())
+  			buf.append(", ");			
+  		i++;					
+  	}
+  	
+  	return buf.toString();
+  }
 
   
   public SchoolCategoryHome getSchoolCategoryHome() {
@@ -822,6 +887,10 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
 		e.printStackTrace();
 	}
   	return home;
+  }
+  
+  public UserBusiness getUserBusiness() throws RemoteException{
+  	return (UserBusiness) getServiceInstance(UserBusiness.class);
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.5 2004/03/17 07:51:40 anders Exp $
+ * $Id: ResourceWriter.java,v 1.6 2004/03/17 07:57:13 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -59,14 +59,14 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/17 07:51:40 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/17 07:57:13 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ResourceWriter {
 
-	private final static String EXPORT_FOLDER_NAME = "School Export Files";
+	private final static String EXPORT_FOLDER_NAME = "Export Files";
 
 	private final int RESOURCE_ID_NATIVE_LANGUAGE_1 = 30;
 	private final int RESOURCE_ID_NATIVE_LANGUAGE_2 = 31;
@@ -227,6 +227,7 @@ public class ResourceWriter {
 				if (student == null) {
 					continue;
 				}
+				String studentName = student.getLastName() + " " + student.getFirstName();
 				SchoolClass schoolClass = placement.getSchoolClass();
 				School school = schoolClass.getSchool();
 				Address address = getCommuneUserBusiness(iwc).getUsersMainAddress(student);
@@ -246,7 +247,7 @@ public class ResourceWriter {
 				row = sheet.createRow((short)cellRow++);
 				
 				row.createCell((short)cellColumn++).setCellValue(PersonalIDFormatter.format(student.getPersonalID(), iwc.getCurrentLocale()));
-				row.createCell((short)cellColumn++).setCellValue(student.getNameLastFirst(true));
+				row.createCell((short)cellColumn++).setCellValue(studentName);
 	
 				if (address != null) {
 					row.createCell((short)cellColumn++).setCellValue(address.getStreetAddress());

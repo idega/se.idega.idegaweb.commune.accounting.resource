@@ -360,7 +360,7 @@ public class ResourceEditor extends AccountingBlock {
 
 	private boolean getGroupIds(IWContext iwc) {
 		// Get group ids from the commune bundle for the groups Anordnare and Centralt
-		IWBundle communeBundle = IWBundle.getBundle(BUNDLE_NAME_COMMUNE, iwc.getIWMainApplication());
+		IWBundle communeBundle = iwc.getIWMainApplication().getBundle(BUNDLE_NAME_COMMUNE);
 
 		// Get provider group id from commune bundle
 		String anordnareIdStr = communeBundle.getProperty(PROP_COMMUNE_PROVIDER_GRP_ID);

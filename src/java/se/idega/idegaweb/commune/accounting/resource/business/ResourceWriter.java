@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.14 2004/03/30 12:55:03 anders Exp $
+ * $Id: ResourceWriter.java,v 1.15 2004/10/01 12:21:42 laddi Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -69,10 +69,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/30 12:55:03 $ by $Author: anders $
+ * Last modified: $Date: 2004/10/01 12:21:42 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ResourceWriter {
 
@@ -222,7 +222,7 @@ public class ResourceWriter {
 			cellColumn = 0;
 			int cellRow = 0;			
 			
-			HSSFRow row = sheet.createRow((short)cellRow++);			
+			HSSFRow row = sheet.createRow(cellRow++);			
 			HSSFCell cell = row.createCell((short)cellColumn++);
 			cell.setCellValue(iwrb.getLocalizedString("resource.personal_id", "Personal ID"));
 			cell.setCellStyle(style);
@@ -285,7 +285,7 @@ public class ResourceWriter {
 				User custodian = getCommuneUserBusiness(iwc).getCustodianForChild(student);
 				ICLanguage nativeLanguage = student.getNativeLanguage();
 	
-				row = sheet.createRow((short)cellRow++);
+				row = sheet.createRow(cellRow++);
 				
 				row.createCell((short)cellColumn++).setCellValue(PersonalIDFormatter.format(student.getPersonalID(), iwc.getCurrentLocale()));
 				row.createCell((short)cellColumn++).setCellValue(studentName);
@@ -393,7 +393,7 @@ public class ResourceWriter {
 			cellColumn = 0;
 			int cellRow = 0;			
 			
-			HSSFRow row = sheet.createRow((short)cellRow++);			
+			HSSFRow row = sheet.createRow(cellRow++);			
 			HSSFCell cell = row.createCell((short)cellColumn++);
 			cell.setCellValue(iwrb.getLocalizedString("resource.personal_id", "Personal ID"));
 			cell.setCellStyle(style);
@@ -495,7 +495,7 @@ public class ResourceWriter {
 				Phone phone = getCommuneUserBusiness(iwc).getChildHomePhone(student);
 				User custodian = getCommuneUserBusiness(iwc).getCustodianForChild(student);
 	
-				row = sheet.createRow((short)cellRow++);
+				row = sheet.createRow(cellRow++);
 				
 				row.createCell((short)cellColumn++).setCellValue(PersonalIDFormatter.format(student.getPersonalID(), iwc.getCurrentLocale()));
 				row.createCell((short)cellColumn++).setCellValue(studentName);
@@ -620,7 +620,7 @@ public class ResourceWriter {
 				int cellRow) throws Exception {
 		
 		
-		HSSFRow row = sheet.createRow((short) cellRow++);			
+		HSSFRow row = sheet.createRow(cellRow++);			
 		HSSFCell cell = row.createCell((short) 0);
 		cell.setCellValue(iwrb.getLocalizedString("resource.management_type", "Management type") + ": " +
 				iwrb.getLocalizedString(managementType.getLocalizedKey(), managementType.getLocalizedKey()).toUpperCase());
@@ -641,7 +641,7 @@ public class ResourceWriter {
 		while (iter.hasNext()) {
 			SchoolType st = (SchoolType) iter.next();
 			int schoolTypeId = ((Integer) st.getPrimaryKey()).intValue();
-			row = sheet.createRow((short) cellRow++);
+			row = sheet.createRow(cellRow++);
 			cell = row.createCell((short) 0);
 			cell.setCellValue(iwrb.getLocalizedString("resource.school_type", "Operation") + ": " + st.getName());
 			cell.setCellStyle(_headerStyle);

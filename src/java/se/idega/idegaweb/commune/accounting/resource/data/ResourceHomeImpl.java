@@ -27,6 +27,13 @@ public java.util.Collection findAssignRightResourcesByGrpId(java.lang.Integer p0
 	return this.getEntityCollectionForPrimaryKeys(ids);
 }
 
+public java.util.Collection findBySchCategory(java.lang.String p0)throws javax.ejb.FinderException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	java.util.Collection ids = ((ResourceBMPBean)entity).ejbFindBySchCategory(p0);
+	this.idoCheckInPooledEntity(entity);
+	return this.getEntityCollectionForPrimaryKeys(ids);
+}
+
 public Resource findResourceByName(java.lang.String p0)throws javax.ejb.FinderException{
 	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
 	Object pk = ((ResourceBMPBean)entity).ejbFindResourceByName(p0);

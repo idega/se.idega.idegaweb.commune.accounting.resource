@@ -82,6 +82,19 @@ public class ResourceBMPBean extends GenericEntity implements Resource {
     return idoFindPKsByQuery(q);
   }
  
+  public Collection ejbFindBySchCategory(String catId) throws FinderException {
+	IDOQuery q = idoQuery();
+	q.append("select distinct r.* from cacc_resource r, cacc_resource_sch_school_type rst, sch_school_type st ");
+	q.appendWhereEquals("r.cacc_resource_id", "rst.cacc_resource_id");
+	q.appendAndEquals("rst.sch_school_type_id", "st.sch_school_type_id");
+	q.appendAndEqualsQuoted("st.school_category", catId);
+	q.appendOrderBy("r." + NAME); 	
+	//System.out.println("SQL *** " + q.toString()); 
+    
+	return idoFindPKsByQuery(q);
+  }
+
+ 
   public String getResourceName() {
     return this.getStringColumnValue(NAME);
   }

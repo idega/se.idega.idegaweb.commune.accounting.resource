@@ -96,7 +96,7 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	return super.idoGetNumberOfRecords(q);    
   }
   
-  public int ejbHomeCountByRscSchoolTypeSeasonAndCommune(int resourceId, int schoolTypeId, int seasonId, int communeId) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
+  public int ejbHomeCountByRscSchoolTypeSeasonManagementTypeAndCommune(int resourceId, int schoolTypeId, int seasonId, String managementTypeId, int communeId) throws IDOException, IDOLookupException, IDOCompositePrimaryKeyException {
 	IDOEntityDefinition cmDef = IDOLookup.getEntityDefinitionForClass(SchoolClassMember.class);
 	String cmTableName = cmDef.getSQLTableName();
 	String cmIdName = cmDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
@@ -112,6 +112,10 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	IDOEntityDefinition aDef = IDOLookup.getEntityDefinitionForClass(Address.class);
 	String aTableName = aDef.getSQLTableName();
 	String aIdName = aDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
+
+	IDOEntityDefinition sDef = IDOLookup.getEntityDefinitionForClass(School.class);
+	String sTableName = sDef.getSQLTableName();
+	String sIdName = sDef.getPrimaryKeyDefinition().getField().getSQLFieldName();
 	
 	String uaTableName = "ic_user_address";
 	
@@ -122,7 +126,8 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	.append(scTableName + " sc, ")
 	.append(uTableName + " u, ")
 	.append(aTableName + " a, ")
-	.append(uaTableName + " ua")
+	.append(uaTableName + " ua, ")
+	.append(sTableName + " s")
 	.appendWhereEquals("rp." + MEMBER, "cm." + cmIdName)
 	.appendAndEquals("rp." +  RESOURCE, resourceId)
 	.appendAnd().append("cm.register_date").appendLessThanOrEqualsSign().appendWithinSingleQuotes(today) 
@@ -136,7 +141,9 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 	.appendAndEquals("ua.ic_address_id", "a." + aIdName)
 	.appendAndEquals("a.ic_commune_id", communeId)
 	.appendAnd().appendLeftParenthesis().append("rp." + ENDDATE + " is null")
-	.appendOr().append("rp." + ENDDATE).appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis();
+	.appendOr().append("rp." + ENDDATE).appendGreaterThanSign().appendWithinSingleQuotes(today).appendRightParenthesis()
+	.appendAndEquals("sc.school_id", "s." + sIdName)
+	.appendAndEqualsQuoted("s.management_type", managementTypeId);
 	return super.idoGetNumberOfRecords(q);    
   }
   

@@ -60,9 +60,9 @@ public int countByRscIdsAndUserId(int[] p0,int p1)throws com.idega.data.IDOExcep
 	return theReturn;
 }
 
-public int countByRscSchoolTypeSeasonAndCommune(int p0,int p1,int p2,int p3)throws com.idega.data.IDOException,com.idega.data.IDOLookupException,com.idega.data.IDOCompositePrimaryKeyException{
+public int countByRscSchoolTypeSeasonManagementTypeAndCommune(int p0,int p1,int p2,java.lang.String p3,int p4)throws com.idega.data.IDOException,com.idega.data.IDOLookupException,com.idega.data.IDOCompositePrimaryKeyException{
 	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
-	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeCountByRscSchoolTypeSeasonAndCommune(p0,p1,p2,p3);
+	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeCountByRscSchoolTypeSeasonManagementTypeAndCommune(p0,p1,p2,p3,p4);
 	this.idoCheckInPooledEntity(entity);
 	return theReturn;
 }

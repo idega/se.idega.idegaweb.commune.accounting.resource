@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.10 2004/03/23 10:39:43 anders Exp $
+ * $Id: ResourceWriter.java,v 1.11 2004/03/24 08:28:21 anders Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -69,10 +69,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2004/03/23 10:39:43 $ by $Author: anders $
+ * Last modified: $Date: 2004/03/24 08:28:21 $ by $Author: anders $
  *
  * @author Anders Lindman
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ResourceWriter {
 
@@ -627,7 +627,7 @@ public class ResourceWriter {
 		
 		ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
 		ResourceClassMemberHome rcmHome = (ResourceClassMemberHome) IDOLookup.getHome(ResourceClassMember.class);
-
+		String managementTypeId = (String) managementType.getPrimaryKey();
 		Iterator iter = schoolTypes.iterator();
 		while (iter.hasNext()) {
 			SchoolType st = (SchoolType) iter.next();
@@ -646,7 +646,7 @@ public class ResourceWriter {
 				cell = row.createCell((short) 0);
 				cell.setCellValue(resource.getResourceName());
 				
-				int studentCount = rcmHome.countByRscSchoolTypeSeasonAndCommune(resourceId, schoolTypeId, seasonId, homeCommuneId);
+				int studentCount = rcmHome.countByRscSchoolTypeSeasonManagementTypeAndCommune(resourceId, schoolTypeId, seasonId, managementTypeId, homeCommuneId);
 				cell = row.createCell((short) 1);
 				cell.setCellValue("" + studentCount);				
 			}

@@ -38,6 +38,7 @@ import com.idega.block.school.data.SchoolYear;
 import com.idega.block.school.data.SchoolYearHome;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOServiceBean;
+import com.idega.data.IDOException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
@@ -154,6 +155,22 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
       e.printStackTrace();
     }
     return rscColl;
+  }
+  
+  public boolean hasResources(int schoolClassMemberID, String resourceIDs) {
+  	try {
+	  	ResourceClassMemberHome mHome = (ResourceClassMemberHome) getIDOHome(ResourceClassMember.class);
+	  	if (mHome.getCountOfResources(schoolClassMemberID, resourceIDs) > 0) {
+	  		return true;
+	  	}
+  	}
+  	catch (IDOException ie) {
+  		log(ie);
+  	}
+  	catch (RemoteException re) {
+  		log(re);
+  	}
+  	return false;
   }
   
   /**

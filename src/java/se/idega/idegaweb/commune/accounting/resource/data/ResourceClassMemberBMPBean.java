@@ -73,7 +73,14 @@ public class ResourceClassMemberBMPBean extends GenericEntity implements Resourc
 
 	System.out.println("*** SQL "  + q.toString());	
 	return super.idoFindPKsByQuery(q);    
-  }  
+  }
+  
+  public int ejbHomeGetCountOfResources(int schoolClassMemberID, String resourceIDs) throws IDOException {
+  	IDOQuery q = this.idoQueryGetSelectCount();
+  	q.appendAndEquals(MEMBER, schoolClassMemberID);
+  	q.appendAnd().append(RESOURCE).appendIn(resourceIDs);
+  	return idoGetNumberOfRecords(q);
+  }
   
   public Resource getResource() {
 	  return (Resource) getColumnValue(RESOURCE);

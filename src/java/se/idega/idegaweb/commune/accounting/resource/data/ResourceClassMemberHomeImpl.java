@@ -46,5 +46,12 @@ public int countByRscIdAndMemberId(java.lang.Integer p0,java.lang.Integer p1)thr
 	return theReturn;
 }
 
+public int getCountOfResources(int p0,java.lang.String p1)throws com.idega.data.IDOException{
+	com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+	int theReturn = ((ResourceClassMemberBMPBean)entity).ejbHomeGetCountOfResources(p0,p1);
+	this.idoCheckInPooledEntity(entity);
+	return theReturn;
+}
+
 
 }

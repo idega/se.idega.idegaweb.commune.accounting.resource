@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import se.idega.idegaweb.commune.accounting.presentation.AccountingBlock;
 import se.idega.idegaweb.commune.accounting.presentation.ApplicationForm;
 import se.idega.idegaweb.commune.accounting.presentation.ButtonPanel;
@@ -21,8 +20,6 @@ import se.idega.idegaweb.commune.accounting.resource.business.ResourceException;
 import se.idega.idegaweb.commune.accounting.resource.data.Resource;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourceBMPBean;
 import se.idega.idegaweb.commune.accounting.resource.data.ResourcePermission;
-import se.idega.idegaweb.commune.presentation.CommuneBlock;
-
 import com.idega.block.school.business.SchoolBusiness;
 import com.idega.block.school.data.SchoolCategory;
 import com.idega.block.school.data.SchoolType;
@@ -60,7 +57,6 @@ public class ResourceEditor extends AccountingBlock {
 	// Commune admin permissions is not saved to db. Has all rights always.
 	boolean providerGroupIdExists = true;
 	// boolean communeAdminGroupIdExists = true;
-	CommuneBlock styleObj = new CommuneBlock();
 	String errMsg = null;
 
 	/********************** Bundle properties ********************/

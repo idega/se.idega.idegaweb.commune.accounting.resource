@@ -127,7 +127,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
    * Returns a Collection of Resources that providers are allowed to assign to a child
    */
   public Collection getAssignRightResourcesForGroup(Integer grpId) {
-    Collection rscColl = null;
+    Collection rscColl = null; 
     try {
       ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
       rscColl = rHome.findAssignRightResourcesByGrpId(grpId);
@@ -158,7 +158,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
     SchoolClass schClass;
     int clsYearID;
     int clsTypeID;
-    
+
     try {
       mbr = getSchoolClassMember(clsMemberID);
       schClass = mbr.getSchoolClass();
@@ -171,18 +171,24 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
         boolean hasType = false;
         Resource theRsc = (Resource) iter.next();
         
-        // Check if the resource has the placements school year
-        Collection rscYears = theRsc.findRelatedSchoolYears();
-        for (Iterator iterator = rscYears.iterator(); iterator.hasNext();) {
-					SchoolYear theYear = (SchoolYear) iterator.next();
-					Integer PK = (Integer) theYear.getPrimaryKey();
-          if (clsYearID == PK.intValue()) {
-            hasYear = true;
-            break;
-          }
-				}
-        // Check if the resource has the placements school type
+        // if the group/class has no schoolyear, don't match year, just set hasYear to true
+        if (clsYearID != -1) {
+          Collection rscYears = theRsc.findRelatedSchoolYears();
+          // Check if the resource has the placement's/schoolClass'es school year
+          for (Iterator iterator = rscYears.iterator(); iterator.hasNext();) {
+  					SchoolYear theYear = (SchoolYear) iterator.next();
+  					Integer PK = (Integer) theYear.getPrimaryKey();
+            if (clsYearID == PK.intValue()) {
+              hasYear = true;
+              break;
+            }
+  				}
+        } else {
+          hasYear = true;
+        }
+        
         Collection rscTypes = theRsc.findRelatedSchoolTypes();
+        // Check if the resource has the placement's/schoolClass'es school year
         for (Iterator iterator = rscTypes.iterator(); iterator.hasNext();) {
           SchoolType theType = (SchoolType) iterator.next();
           Integer PK = (Integer) theType.getPrimaryKey();
@@ -191,7 +197,7 @@ public class ResourceBusinessBean extends IBOServiceBean implements ResourceBusi
             break;
           }					
 				}
-        
+              
         // if the Resource has the year and type. Add to validRscs          
         if (hasYear  && hasType) {
           validRscs.add(theRsc);

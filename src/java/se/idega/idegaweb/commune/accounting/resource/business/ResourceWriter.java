@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.20 2005/01/17 11:28:50 laddi Exp $
+ * $Id: ResourceWriter.java,v 1.21 2005/05/11 07:15:37 laddi Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -69,10 +69,10 @@ import com.idega.util.PersonalIDFormatter;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2005/01/17 11:28:50 $ by $Author: laddi $
+ * Last modified: $Date: 2005/05/11 07:15:37 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ResourceWriter {
 
@@ -182,7 +182,7 @@ public class ResourceWriter {
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
 
 			SchoolBusiness sb = getSchoolBusiness(iwc);
-			SchoolSeason season = sb.getCurrentSchoolSeason();
+			SchoolSeason season = sb.getCurrentSchoolSeason(sb.getCategoryElementarySchool());
 			int seasonId = ((Integer) season.getPrimaryKey()).intValue();
 			
 			CommuneHome communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);
@@ -352,7 +352,7 @@ public class ResourceWriter {
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
 
 			SchoolBusiness sb = getSchoolBusiness(iwc);
-			SchoolSeason currentSeason = sb.getCurrentSchoolSeason();
+			SchoolSeason currentSeason = sb.getCurrentSchoolSeason(sb.getCategoryElementarySchool());
 			CurrentSchoolSeasonHome seasonHome = (CurrentSchoolSeasonHome) IDOLookup.getHome(CurrentSchoolSeason.class);
 			CurrentSchoolSeason season = seasonHome.findCurrentSeason();
 			int currentSchoolChoiceSeasonId = season.getCurrent().intValue();
@@ -567,7 +567,7 @@ public class ResourceWriter {
 			SchoolManagementTypeHome smtHome = (SchoolManagementTypeHome) IDOLookup.getHome(SchoolManagementType.class);
 			Collection managementTypes = smtHome.findManagementTypesByCategories(categories);
 			
-			SchoolSeason season = sb.getCurrentSchoolSeason();
+			SchoolSeason season = sb.getCurrentSchoolSeason(sb.getCategoryElementarySchool());
 			int seasonId = ((Integer) season.getPrimaryKey()).intValue();
 			
 			CommuneHome communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);

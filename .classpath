@@ -5,11 +5,11 @@
   </classpathentry>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
   </classpathentry>
-  <classpathentry kind="var" path="MAVEN_REPO/myfaces/jars/jsf-api-1.0.jar">
+  <classpathentry kind="var" path="MAVEN_REPO/myfaces/jars/myfaces-jsf-api-1.0.9.jar">
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/ejb/jars/ejb-2.0.jar">
   </classpathentry>
-  <classpathentry kind="var" path="MAVEN_REPO/poi/jars/poi-1.8.0-dev-20020919.jar">
+  <classpathentry kind="var" path="MAVEN_REPO/poi/jars/poi-2.5-final-20040428.jar">
   </classpathentry>
   <classpathentry kind="src" path="/com.idega.core">
   </classpathentry>

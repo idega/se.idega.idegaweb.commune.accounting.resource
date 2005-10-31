@@ -1,5 +1,5 @@
 /*
- * $Id: NativeLanguageList.java,v 1.3 2004/03/30 08:58:05 anders Exp $
+ * $Id: NativeLanguageList.java,v 1.4 2005/10/31 16:42:30 sigtryggur Exp $
  *
  * Copyright (C) 2004 Agura IT. All Rights Reserved.
  *
@@ -19,14 +19,15 @@ import com.idega.presentation.Table;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.SubmitButton;
+import com.idega.util.Timer;
 
 /** 
  * This idegaWeb block generates Excel file listing placements with native languge resources.
  * <p>
- * Last modified: $Date: 2004/03/30 08:58:05 $ by $Author: anders $
+ * Last modified: $Date: 2005/10/31 16:42:30 $ by $Author: sigtryggur $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NativeLanguageList extends AccountingBlock {
 
@@ -121,6 +122,8 @@ public class NativeLanguageList extends AccountingBlock {
 		table.setCellspacing(getCellspacing());
 
 		try {
+		    Timer t = new Timer();
+			t.start();
 			ResourceWriter xlsWriter = new ResourceWriter(fileName);
 			ICFile file = xlsWriter.createFile(iwc, isSchoolChoice);
 			Link iconLink = new Link(getBundle().getImage("shared/xls.gif"));
@@ -142,6 +145,8 @@ public class NativeLanguageList extends AccountingBlock {
 			table.add(form, 1, 4);
 			table.mergeCells(1, 4, 2, 4);
 			add(table);
+			t.stop();
+			System.out.println("Total execution time of modersmallista was = "+t.getTimeString());
 
 		} catch (Exception e) {
 			log(e);

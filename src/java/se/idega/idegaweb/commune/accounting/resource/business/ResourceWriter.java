@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.21 2005/05/11 07:15:37 laddi Exp $
+ * $Id: ResourceWriter.java,v 1.22 2005/10/31 16:42:00 sigtryggur Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -51,6 +51,8 @@ import com.idega.core.file.data.ICFileBMPBean;
 import com.idega.core.file.data.ICFileHome;
 import com.idega.core.localisation.data.ICLanguage;
 import com.idega.core.location.data.Address;
+//import com.idega.core.location.data.AddressType;
+//import com.idega.core.location.data.AddressTypeHome;
 import com.idega.core.location.data.Commune;
 import com.idega.core.location.data.CommuneHome;
 import com.idega.core.location.data.PostalCode;
@@ -65,14 +67,15 @@ import com.idega.presentation.IWContext;
 import com.idega.presentation.Table;
 import com.idega.user.data.User;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.Timer;
 
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2005/05/11 07:15:37 $ by $Author: laddi $
+ * Last modified: $Date: 2005/10/31 16:42:00 $ by $Author: sigtryggur $
  *
  * @author Anders Lindman
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ResourceWriter {
 
@@ -179,6 +182,8 @@ public class ResourceWriter {
 	private MemoryFileBuffer getNativeLanguageBuffer(IWContext iwc) {
 		MemoryFileBuffer buffer = null;
 		try {
+			Timer t = new Timer();
+			t.start();
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
 
 			SchoolBusiness sb = getSchoolBusiness(iwc);
@@ -257,6 +262,13 @@ public class ResourceWriter {
 			cell.setCellValue(iwrb.getLocalizedString("resource.nrof_native_language_years", "Number of native language years"));
 			cell.setCellStyle(style);
 	
+			//AddressTypeHome addressHome = (AddressTypeHome) IDOLookup.getHome(AddressType.class);
+			//AddressType at1 = null;
+			//try {
+			//    at1 = addressHome.findAddressType1();
+			//} catch (FinderException e) {
+			//    e.printStackTrace();
+			//}
 			Iterator iter = resourceMembers.iterator();
 			while (iter.hasNext()) {
 				cellColumn = 0;
@@ -272,6 +284,11 @@ public class ResourceWriter {
 				SchoolClass schoolClass = placement.getSchoolClass();
 				School school = schoolClass.getSchool();
 				Address address = getCommuneUserBusiness(iwc).getUsersMainAddress(student);
+				//Collection addresses = student.getAddresses(at1);
+				//Address address = null;
+			   	//if (addresses != null && !addresses.isEmpty()) {
+			   	//    address = (Address)addresses.iterator().next();
+			   	//}
 				PostalCode postalCode = null;
 				int communeId = -1;
 				if (address != null) {
@@ -337,6 +354,8 @@ public class ResourceWriter {
 			
 			wb.write(mos);
 			buffer.setMimeType("application/vnd.ms-excel");
+			t.stop();
+			System.out.println("Execution time of the content of modersmallista was = "+t.getTimeString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

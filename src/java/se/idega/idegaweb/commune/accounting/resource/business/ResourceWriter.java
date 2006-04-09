@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.22 2005/10/31 16:42:00 sigtryggur Exp $
+ * $Id: ResourceWriter.java,v 1.23 2006/04/09 11:52:28 laddi Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -72,10 +72,10 @@ import com.idega.util.Timer;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2005/10/31 16:42:00 $ by $Author: sigtryggur $
+ * Last modified: $Date: 2006/04/09 11:52:28 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ResourceWriter {
 
@@ -96,7 +96,7 @@ public class ResourceWriter {
 	 * Constructs a resource writer object.
 	 */	
 	public ResourceWriter(String filename) {
-		_filename = filename;
+		this._filename = filename;
 	}	
 	
 	/**
@@ -155,7 +155,7 @@ public class ResourceWriter {
 			}
 			MemoryInputStream mis = new MemoryInputStream(buffer);
 			try {
-				exportFile = fileHome.findByFileName(_filename);
+				exportFile = fileHome.findByFileName(this._filename);
 				if (exportFile != null) {
 					exportFile.remove();
 				}
@@ -164,7 +164,7 @@ public class ResourceWriter {
 			exportFile = fileHome.create();
 			exportFile.setFileValue(mis);
 			exportFile.setMimeType("application/vnd.ms-excel");
-			exportFile.setName(_filename);
+			exportFile.setName(this._filename);
 			exportFile.setFileSize(buffer.length());
 			exportFile.store();
 
@@ -204,7 +204,7 @@ public class ResourceWriter {
 			MemoryOutputStream mos = new MemoryOutputStream(buffer);
 	
 			HSSFWorkbook wb = new HSSFWorkbook();
-			HSSFSheet sheet = wb.createSheet(_filename);
+			HSSFSheet sheet = wb.createSheet(this._filename);
 			int cellColumn = 0;
 
 			sheet.setColumnWidth((short)cellColumn++, (short) (16 * 256));
@@ -387,7 +387,7 @@ public class ResourceWriter {
 			MemoryOutputStream mos = new MemoryOutputStream(buffer);
 			
 			HSSFWorkbook wb = new HSSFWorkbook();
-			HSSFSheet sheet = wb.createSheet(_filename);
+			HSSFSheet sheet = wb.createSheet(this._filename);
 			int cellColumn = 0;
 
 			sheet.setColumnWidth((short)cellColumn++, (short) (16 * 256));
@@ -597,7 +597,7 @@ public class ResourceWriter {
 			MemoryOutputStream mos = new MemoryOutputStream(buffer);
 	
 			HSSFWorkbook wb = new HSSFWorkbook();
-			HSSFSheet sheet = wb.createSheet(_filename);
+			HSSFSheet sheet = wb.createSheet(this._filename);
 
 			sheet.setColumnWidth((short) 0, (short) (30 * 256));
 			sheet.setColumnWidth((short) 1, (short) (20 * 256));
@@ -606,8 +606,8 @@ public class ResourceWriter {
 			HSSFFont font = wb.createFont();
 			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 			font.setFontHeightInPoints((short)12);
-			_headerStyle = wb.createCellStyle();
-			_headerStyle.setFont(font);
+			this._headerStyle = wb.createCellStyle();
+			this._headerStyle.setFont(font);
 
 			Collection schoolTypes = new ArrayList();
 			schoolTypes.addAll(sb.findAllSchoolTypesInCategory(categories[0], false));
@@ -643,14 +643,14 @@ public class ResourceWriter {
 		HSSFCell cell = row.createCell((short) 0);
 		cell.setCellValue(iwrb.getLocalizedString("resource.management_type", "Management type") + ": " +
 				iwrb.getLocalizedString(managementType.getLocalizedKey(), managementType.getLocalizedKey()).toUpperCase());
-		cell.setCellStyle(_headerStyle);
+		cell.setCellStyle(this._headerStyle);
 		if (cellRow == 1) {
 			cell = row.createCell((short) 1);
 			cell.setCellValue(iwrb.getLocalizedString("resource.commune_students", "Commune students"));
-			cell.setCellStyle(_headerStyle);
+			cell.setCellStyle(this._headerStyle);
 			cell = row.createCell((short) 2);
 			cell.setCellValue(iwrb.getLocalizedString("resource.outside_commune_students", "Students outside commune"));
-			cell.setCellStyle(_headerStyle);
+			cell.setCellStyle(this._headerStyle);
 		}
 		
 		ResourceHome rHome = (ResourceHome) IDOLookup.getHome(Resource.class);
@@ -663,7 +663,7 @@ public class ResourceWriter {
 			row = sheet.createRow(cellRow++);
 			cell = row.createCell((short) 0);
 			cell.setCellValue(iwrb.getLocalizedString("resource.school_type", "Operation") + ": " + st.getName());
-			cell.setCellStyle(_headerStyle);
+			cell.setCellStyle(this._headerStyle);
 			
 			Collection resources = rHome.findBySchoolType(schoolTypeId);
 			Iterator resourcesIter = resources.iterator();

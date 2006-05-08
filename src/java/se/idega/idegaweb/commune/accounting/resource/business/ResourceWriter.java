@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceWriter.java,v 1.23 2006/04/09 11:52:28 laddi Exp $
+ * $Id: ResourceWriter.java,v 1.24 2006/05/08 13:51:30 laddi Exp $
  *
  * Copyright (C) 2003 Agura IT. All Rights Reserved.
  *
@@ -23,7 +23,6 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import se.idega.idegaweb.commune.accounting.presentation.AccountingBlock;
 import se.idega.idegaweb.commune.business.CommuneUserBusiness;
 import se.idega.idegaweb.commune.care.data.CurrentSchoolSeason;
 import se.idega.idegaweb.commune.care.data.CurrentSchoolSeasonHome;
@@ -31,6 +30,7 @@ import se.idega.idegaweb.commune.care.resource.data.Resource;
 import se.idega.idegaweb.commune.care.resource.data.ResourceClassMember;
 import se.idega.idegaweb.commune.care.resource.data.ResourceClassMemberHome;
 import se.idega.idegaweb.commune.care.resource.data.ResourceHome;
+import se.idega.idegaweb.commune.presentation.CommuneBlock;
 import se.idega.idegaweb.commune.school.data.SchoolChoice;
 import se.idega.idegaweb.commune.school.data.SchoolChoiceHome;
 
@@ -51,8 +51,6 @@ import com.idega.core.file.data.ICFileBMPBean;
 import com.idega.core.file.data.ICFileHome;
 import com.idega.core.localisation.data.ICLanguage;
 import com.idega.core.location.data.Address;
-//import com.idega.core.location.data.AddressType;
-//import com.idega.core.location.data.AddressTypeHome;
 import com.idega.core.location.data.Commune;
 import com.idega.core.location.data.CommuneHome;
 import com.idega.core.location.data.PostalCode;
@@ -72,10 +70,10 @@ import com.idega.util.Timer;
 /** 
  * Exports files with information connected to resources.
  * <p>
- * Last modified: $Date: 2006/04/09 11:52:28 $ by $Author: laddi $
+ * Last modified: $Date: 2006/05/08 13:51:30 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ResourceWriter {
 
@@ -184,7 +182,7 @@ public class ResourceWriter {
 		try {
 			Timer t = new Timer();
 			t.start();
-			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
+			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(CommuneBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
 
 			SchoolBusiness sb = getSchoolBusiness(iwc);
 			SchoolSeason season = sb.getCurrentSchoolSeason(sb.getCategoryElementarySchool());
@@ -368,7 +366,7 @@ public class ResourceWriter {
 	private MemoryFileBuffer getNativeLanguageSchoolChoiceBuffer(IWContext iwc) {
 		MemoryFileBuffer buffer = null;
 		try {
-			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
+			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(CommuneBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
 
 			SchoolBusiness sb = getSchoolBusiness(iwc);
 			SchoolSeason currentSeason = sb.getCurrentSchoolSeason(sb.getCategoryElementarySchool());
@@ -576,7 +574,7 @@ public class ResourceWriter {
 	private MemoryFileBuffer getManagementTypeResourceBuffer(IWContext iwc) {
 		MemoryFileBuffer buffer = null;
 		try {
-			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(AccountingBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
+			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(CommuneBlock.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc.getCurrentLocale());
 
 			SchoolBusiness sb = getSchoolBusiness(iwc);
 			String[] categories = new String[2];

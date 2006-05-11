@@ -12,6 +12,7 @@
     <project>se.idega.idegaweb.commune.school</project>
     <project>se.idega.idegaweb.commune.accounting</project>
     <project>com.idega.block.process</project>
+    <project>com.idega.block.web2.0</project>
   </projects>
   <buildSpec>
     <buildCommand>
